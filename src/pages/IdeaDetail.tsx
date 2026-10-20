@@ -1,14 +1,12 @@
-import { useState } from "react";
 import { useSite } from "../components/SiteProvider";
 import { Link, useParams } from "react-router";
-import { ArrowRight, Check, FileText, MessageCircle, ShoppingBag } from "lucide-react";
+import { ArrowRight, Check, FileText, MessageCircle } from "lucide-react";
 import Container from "../components/Container";
 import Skeleton from "../components/Skeleton";
 import DifficultyMeter from "../components/DifficultyMeter";
 import ProfitCalculator from "../components/ProfitCalculator";
 import IdeaCard from "../components/IdeaCard";
-import Modal from "../components/Modal";
-import OrderForm from "../components/OrderForm";
+import AddToCartButton from "../components/AddToCartButton";
 import Reveal from "../components/Reveal";
 import ButtonLink from "../components/ButtonLink";
 import NotFound from "./NotFound";
@@ -21,7 +19,6 @@ export default function IdeaDetail() {
   const { id = "" } = useParams();
   const { data: idea, loading } = useAsync(() => getIdea(id), [id]);
   const { data: all } = useAsync(getIdeas);
-  const [orderOpen, setOrderOpen] = useState(false);
 
   if (loading) {
     return (
@@ -106,13 +103,7 @@ export default function IdeaDetail() {
             </div>
             <p className="mt-2 font-display text-4xl font-bold">{money(idea.price)}</p>
             <p className="mt-1 text-sm text-muted">{t("idea.buyNote")}</p>
-            <button
-              type="button"
-              onClick={() => setOrderOpen(true)}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-accent py-4 font-display font-bold text-paper transition-all hover:bg-accent-deep active:scale-[0.98]"
-            >
-              <ShoppingBag className="size-4" /> {t("idea.buyButton")}
-            </button>
+            <AddToCartButton idea={idea} className="mt-6 w-full py-4" />
             <ButtonLink to="/custom" variant="ghost" className="mt-3 w-full">
               {t("idea.customButton")}
             </ButtonLink>
@@ -141,16 +132,11 @@ export default function IdeaDetail() {
             <p className="text-xs text-muted">{idea.title}</p>
             <p className="font-display text-xl font-bold">{money(idea.price)}</p>
           </div>
-          <button type="button" onClick={() => setOrderOpen(true)} className="rounded-full bg-accent px-6 py-3 font-display font-bold text-paper">
-            {t("idea.buyButton")}
-          </button>
+          <AddToCartButton idea={idea} className="px-5 py-3 text-sm" />
         </div>
       </div>
       <div className="h-20 lg:hidden" />
 
-      <Modal open={orderOpen} onClose={() => setOrderOpen(false)} title={t("order.title")}>
-        <OrderForm idea={idea} onDone={() => setOrderOpen(false)} />
-      </Modal>
     </>
   );
 }

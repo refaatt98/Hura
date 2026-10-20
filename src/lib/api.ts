@@ -9,6 +9,7 @@ import { supabase } from "./supabase";
 import { defaultCustomForm, defaultSite } from "../data/site";
 import { defaultTexts } from "../data/texts";
 import type {
+  CartItem,
   ContactMessage,
   CustomFormConfig,
   CustomRequest,
@@ -320,13 +321,24 @@ export async function deleteWorkshop(id: string): Promise<void> {
 /* ───────── public submissions ─────────
    Visitors can insert but not read back (RLS), so we don't `.select()` after insert. */
 
+/** Short readable order number, e.g. HB-7K3Q9A (no ambiguous characters). */
+export function newOrderCode(): string {
+  const abc = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  const bytes = crypto.getRandomValues(new Uint8Array(6));
+  return "HB-" + Array.from(bytes, (b) => abc[b % abc.length]).join("");
+}
+
+/** Saves a cart order (several ideas). */
 export async function createIdeaOrder(input: NewIdeaOrder): Promise<void> {
   const { error } = await supabase.from("idea_orders").insert({
-    idea_id: input.ideaId,
-    idea_title: input.ideaTitle,
+    code: input.code,
+    items: input.items,
+    total: input.total,
+    idea_id: input.items[0]?.id ?? null,
+    idea_title: input.items.map((i) => i.title).join("، ").slice(0, 200),
     name: input.name.trim(),
     phone: input.phone.trim(),
-    email: clean(input.email),
+    address: input.address.trim(),
     notes: clean(input.notes),
   });
   if (error) fail(error);
@@ -394,15 +406,20 @@ const base = (r: Row) => ({
 const opt = (v: unknown) => (v == null ? undefined : (v as string));
 
 const mappers: { [K in SubmissionKind]: (r: Row) => SubmissionMap[K] } = {
-  orders: (r) => ({
-    ...base(r),
-    ideaId: (r.idea_id as string) ?? "",
-    ideaTitle: r.idea_title as string,
-    name: r.name as string,
-    phone: r.phone as string,
-    email: opt(r.email),
-    notes: opt(r.notes),
-  }),
+  orders: (r) => {
+    const items = (r.items as CartItem[] | null) ?? [];
+    return {
+      ...base(r),
+      code: (r.code as string) ?? "",
+      // older single-idea orders: fall back to the idea title
+      items: items.length ? items : [{ id: (r.idea_id as string) ?? "", code: "", title: (r.idea_title as string) ?? "", price: 0 }],
+      total: (r.total as number) ?? 0,
+      name: r.name as string,
+      phone: r.phone as string,
+      address: (r.address as string) ?? "",
+      notes: opt(r.notes),
+    };
+  },
   custom: (r) => ({
     ...base(r),
     field: r.field as string,

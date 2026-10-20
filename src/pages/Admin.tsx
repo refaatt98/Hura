@@ -222,7 +222,7 @@ function Overview({ go }: { go: (t: Tab) => void }) {
       getWorkshops(),
     ]).then(([orders, custom, regs, msgs, ideas, workshops]) => {
       const recent: Activity[] = [
-        ...orders.map((x) => ({ kind: "orders" as const, id: x.id, who: x.name, what: `طلب ملف «${x.ideaTitle}»`, at: x.createdAt, status: x.status })),
+        ...orders.map((x) => ({ kind: "orders" as const, id: x.id, who: x.name, what: `طلب ${x.code} · ${x.items.length} ملف · ${money(x.total)}`, at: x.createdAt, status: x.status })),
         ...custom.map((x) => ({ kind: "custom" as const, id: x.id, who: x.name, what: `مشروع مخصص · ${x.field}`, at: x.createdAt, status: x.status })),
         ...regs.map((x) => ({ kind: "registrations" as const, id: x.id, who: x.name, what: `تسجيل بورشة «${x.workshopTitle}»`, at: x.createdAt, status: x.status })),
         ...msgs.map((x) => ({ kind: "messages" as const, id: x.id, who: x.name, what: `رسالة · ${x.subject}`, at: x.createdAt, status: x.status })),

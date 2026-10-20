@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpLeft, Menu, X } from "lucide-react";
+import { ArrowUpLeft, Menu, ShoppingBag, X } from "lucide-react";
 import Logo from "./Logo";
 import { navLinks } from "./navLinks";
 import Instagram from "./InstagramIcon";
 import { useSite } from "./SiteProvider";
+import { useCart } from "./CartProvider";
 
 /** Floating pill navigation. */
 export default function Header() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const { site, t } = useSite();
+  const cart = useCart();
 
   useEffect(() => {
     setOpen(false);
@@ -45,6 +47,24 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => cart.setOpen(true)}
+            className="relative grid size-10 place-items-center rounded-full bg-paper-deep text-ink transition-colors hover:bg-accent-soft"
+            aria-label={`${t("cart.title")} (${cart.count})`}
+          >
+            <ShoppingBag className="size-5" />
+            {cart.count > 0 && (
+              <motion.span
+                key={cart.count}
+                initial={{ scale: 0.4 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-1 -left-1 grid min-w-5 place-items-center rounded-full bg-accent px-1 font-mono text-[11px] font-semibold text-paper ring-2 ring-card"
+              >
+                {cart.count}
+              </motion.span>
+            )}
+          </button>
           <NavLink
             to="/custom"
             className="hidden items-center gap-1.5 rounded-full bg-accent px-5 py-2.5 font-display text-sm font-bold text-paper transition-colors hover:bg-accent-deep sm:inline-flex"

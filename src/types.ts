@@ -97,19 +97,29 @@ export interface SiteInfo {
 
 export type RequestStatus = "جديد" | "قيد المتابعة" | "مكتمل";
 
+/** One idea inside a cart / order (a snapshot taken when the order was placed). */
+export interface CartItem {
+  id: string;
+  code: string;
+  title: string;
+  price: number;
+}
+
 export interface IdeaOrder {
   id: string;
-  ideaId: string;
-  ideaTitle: string;
+  /** Readable order number, e.g. HB-7K3Q9A */
+  code: string;
+  items: CartItem[];
+  total: number;
   name: string;
   phone: string;
-  email?: string;
+  address: string;
   notes?: string;
   createdAt: string;
   status: RequestStatus;
 }
 
-export type NewIdeaOrder = Pick<IdeaOrder, "ideaId" | "ideaTitle" | "name" | "phone" | "email" | "notes">;
+export type NewIdeaOrder = Pick<IdeaOrder, "code" | "items" | "total" | "name" | "phone" | "address" | "notes">;
 
 export interface CustomRequest {
   id: string;

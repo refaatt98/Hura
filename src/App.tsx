@@ -8,6 +8,7 @@ import CustomProject from "./pages/CustomProject";
 import Workshops from "./pages/Workshops";
 import WorkshopDetail from "./pages/WorkshopDetail";
 import Contact from "./pages/Contact";
+import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 
 // Admin code is only downloaded when someone opens /admin
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="workshops" element={<Workshops />} />
         <Route path="workshops/:id" element={<WorkshopDetail />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="cart" element={<Checkout />} />
         <Route path="*" element={<NotFound />} />
       </Route>
       {/* admin has its own layout (no public header/footer) */}

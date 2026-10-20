@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Inbox, MessageCircle, Phone, Search, Trash2 } from "lucide-react";
 import type { RequestStatus, SubmissionKind } from "../../types";
 import { deleteSubmission, getSubmissions, updateSubmissionStatus, type SubmissionMap } from "../../lib/api";
-import { formatDate, formatTime } from "../../lib/format";
+import { formatDate, formatTime, money } from "../../lib/format";
 import StatusBadge, { statuses } from "./StatusBadge";
 import Skeleton from "../Skeleton";
 
@@ -19,11 +19,13 @@ interface Config<K extends SubmissionKind> {
 const configs: { [K in SubmissionKind]: Config<K> } = {
   orders: {
     title: (x) => x.name,
-    subtitle: (x) => `طلب ملف: ${x.ideaTitle}`,
+    subtitle: (x) => `${x.code ? x.code + " · " : ""}${x.items.length} ملف · ${money(x.total)} · ${x.items.map((i) => i.title).join("، ")}`,
     rows: (x) => [
-      { label: "الفكرة", value: x.ideaTitle },
+      { label: "رقم الطلب", value: x.code },
+      { label: "المجموع", value: money(x.total) },
+      { label: "الملفات", value: x.items.map((i, n) => `${n + 1}. ${i.title}${i.code ? ` (${i.code})` : ""}${i.price ? ` — ${money(i.price)}` : ""}`).join("\n") },
       { label: "الهاتف", value: x.phone },
-      { label: "الإيميل", value: x.email },
+      { label: "العنوان", value: x.address },
       { label: "ملاحظات", value: x.notes },
     ],
     phone: (x) => x.phone,

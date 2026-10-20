@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router";
 import App from "./App";
 import { SiteProvider } from "./components/SiteProvider";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { CartProvider } from "./components/CartProvider";
 import "./index.css";
 
 // After a new deploy, an old open tab may ask for files that no longer exist — reload to get the new version.
@@ -25,7 +26,9 @@ createRoot(document.getElementById("root")!).render(
     <ErrorBoundary>
       <BrowserRouter>
         <SiteProvider>
-          <App />
+          <CartProvider>
+            <App />
+          </CartProvider>
         </SiteProvider>
       </BrowserRouter>
     </ErrorBoundary>
