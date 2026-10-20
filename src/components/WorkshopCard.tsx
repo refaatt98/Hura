@@ -9,12 +9,12 @@ export default function WorkshopCard({ workshop: w }: { workshop: Workshop }) {
   return (
     <Link
       to={`/workshops/${w.id}`}
-      className="group flex gap-4 rounded-xl border-2 border-ink bg-card p-4 transition-all hover:-translate-y-0.5 hover:shadow-[5px_5px_0_var(--color-ink)] sm:gap-5 sm:p-5"
+      className="group flex gap-4 rounded-2xl bg-card p-4 ring-1 ring-ink/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_-20px_rgba(14,24,48,.45)] hover:ring-ink sm:gap-5 sm:p-5"
     >
       {/* calendar stub */}
-      <div className="flex w-16 shrink-0 flex-col overflow-hidden rounded-lg border-2 border-ink text-center sm:w-20">
-        <span className="bg-accent py-1 text-xs font-semibold text-paper">{formatMonth(w.date)}</span>
-        <span className="grid flex-1 place-items-center py-2 font-display text-2xl font-bold sm:text-3xl">{formatDay(w.date)}</span>
+      <div className="flex w-16 shrink-0 flex-col overflow-hidden rounded-xl bg-ink text-center text-paper sm:w-20">
+        <span className="bg-accent py-1 text-xs font-bold text-paper">{formatMonth(w.date)}</span>
+        <span className="grid flex-1 place-items-center py-2 font-mono text-2xl font-semibold text-flap-amber sm:text-3xl">{formatDay(w.date)}</span>
       </div>
 
       <div className="min-w-0 flex-1">
@@ -24,7 +24,7 @@ export default function WorkshopCard({ workshop: w }: { workshop: Workshop }) {
           </span>
           <span className="font-display text-sm font-semibold text-accent">{money(w.price)}</span>
         </div>
-        <h3 className="text-lg font-bold leading-snug group-hover:text-accent">{w.title}</h3>
+        <h3 className="text-xl font-extrabold leading-snug group-hover:text-accent-deep">{w.title}</h3>
         <p className="mt-1 line-clamp-2 text-sm text-ink-soft">{w.summary}</p>
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
           <span className="inline-flex items-center gap-1"><Clock className="size-3.5" />{formatTime(w.date)} · {hoursLabel(w.durationHours)}</span>

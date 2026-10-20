@@ -8,9 +8,9 @@ export interface Idea {
   category: string;
   summary: string;
   description: string;
-  /** Price of the full idea file, in USD */
+  /** Price of the full idea file, in ILS (₪) */
   price: number;
-  /** Estimated starting capital range, in USD */
+  /** Estimated starting capital range, in ILS (₪) */
   capitalMin: number;
   capitalMax: number;
   /** Estimated months to recover the capital */

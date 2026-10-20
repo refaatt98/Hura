@@ -6,7 +6,7 @@ export const instagramPosts: InstagramPost[] = [
     id: "ig-1",
     image: "/instagram/post-1.svg",
     title: "10 مشاريع برأس مال صغير",
-    caption: "أفكار تبدأ فيها بأقل من 2000$ وتكبر معك خطوة بخطوة.",
+    caption: "أفكار تبدأ فيها بأقل من 7,000 ₪ وتكبر معك خطوة بخطوة.",
     url: "https://www.instagram.com/hura_business_projects/",
   },
   {

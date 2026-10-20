@@ -35,36 +35,33 @@ export default function IdeaDetail() {
   const related = (all ?? []).filter((i) => i.id !== idea.id && i.category === idea.category).slice(0, 3);
   const others = related.length ? related : (all ?? []).filter((i) => i.id !== idea.id).slice(0, 3);
 
-  const metrics = [
+  const metrics: { label: string; value?: string; ltr?: boolean; signal?: boolean; node?: React.ReactNode }[] = [
     { label: "رأس المال", value: moneyRange(idea.capitalMin, idea.capitalMax), ltr: true },
     { label: "الاسترداد", value: monthsLabel(idea.paybackMonths) },
-    { label: "هامش الربح", value: `${idea.marginPercent}%` },
+    { label: "هامش الربح", value: `▲ ${idea.marginPercent}%`, signal: true },
     { label: "الصعوبة", node: <DifficultyMeter value={idea.difficulty} /> },
   ];
 
   return (
     <>
-      <section className="relative border-b-2 border-ink">
-        <div className="ruled pointer-events-none absolute inset-0 opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-        <Container className="relative py-10 sm:py-14">
-          <Link to="/ideas" className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink">
-            <ArrowRight className="size-4" /> كل الأفكار
+      <section className="grid-lines relative overflow-hidden bg-ink text-paper">
+        <div className="pointer-events-none absolute -top-40 -left-40 size-[28rem] rounded-full bg-accent/25 blur-[120px]" />
+        <Container className="relative pt-28 pb-12 sm:pt-36 sm:pb-16">
+          <Link to="/ideas" className="mb-8 inline-flex items-center gap-1.5 text-sm text-paper/50 hover:text-paper">
+            <ArrowRight className="size-4" /> كل الفرص
           </Link>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-md border-2 border-ink bg-card px-2 py-0.5 font-mono text-xs">{idea.code}</span>
-            <span className="rounded-full bg-accent-soft px-3 py-0.5 text-sm font-medium text-accent-deep">{idea.category}</span>
+            <span className="rounded-md bg-flap px-2 py-1 font-mono text-xs font-semibold text-flap-amber">{idea.code}</span>
+            <span className="rounded-full bg-paper/10 px-3 py-1 text-sm font-medium ring-1 ring-paper/15">{idea.category}</span>
           </div>
-          <h1 className="mt-4 text-4xl leading-tight font-bold sm:text-5xl">{idea.title}</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-ink-soft">{idea.summary}</p>
+          <h1 className="mt-5 text-5xl leading-[1.08] font-black sm:text-7xl">{idea.title}</h1>
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-paper/70">{idea.summary}</p>
 
-          <dl className="mt-8 grid grid-cols-2 overflow-hidden rounded-2xl border-2 border-ink bg-card md:grid-cols-4">
-            {metrics.map((m, i) => (
-              <div
-                key={m.label}
-                className={`p-4 sm:p-5 ${i % 2 === 0 ? "border-l-2 border-ink" : ""} ${i < 2 ? "border-b-2 border-ink md:border-b-0" : ""} ${i === 1 ? "md:border-l-2" : ""}`}
-              >
-                <dt className="text-xs text-muted">{m.label}</dt>
-                <dd dir={m.ltr ? "ltr" : undefined} className={`mt-1 font-display text-lg font-bold sm:text-xl ${m.ltr ? "text-right" : ""}`}>
+          <dl className="mt-10 grid grid-cols-2 gap-2 md:grid-cols-4">
+            {metrics.map((m) => (
+              <div key={m.label} className="rounded-2xl bg-ink-2 p-4 ring-1 ring-paper/10 sm:p-5">
+                <dt className="text-xs text-paper/50">{m.label}</dt>
+                <dd dir={m.ltr ? "ltr" : undefined} className={`mt-2 font-display text-lg font-extrabold sm:text-2xl ${m.ltr ? "text-right" : ""} ${m.signal ? "text-signal" : ""}`}>
                   {m.node ?? m.value}
                 </dd>
               </div>
@@ -84,7 +81,7 @@ export default function IdeaDetail() {
             <h2 className="mb-4 text-2xl font-bold">شو بيشمل الملف؟</h2>
             <ul className="grid gap-3 sm:grid-cols-2">
               {idea.includes.map((item) => (
-                <li key={item} className="flex items-start gap-3 rounded-xl border-2 border-line bg-card p-4">
+                <li key={item} className="flex items-start gap-3 rounded-2xl bg-card p-4 ring-1 ring-ink/10">
                   <span className="grid size-6 shrink-0 place-items-center rounded-md bg-ink text-paper">
                     <Check className="size-4" />
                   </span>
@@ -101,7 +98,7 @@ export default function IdeaDetail() {
 
         {/* Purchase card */}
         <aside className="lg:sticky lg:top-28 lg:self-start">
-          <div className="rounded-2xl border-2 border-ink bg-card p-6 shadow-[6px_6px_0_var(--color-accent)]">
+          <div className="rounded-3xl bg-card p-6 ring-1 ring-ink/10 shadow-[0_30px_60px_-30px_rgba(14,24,48,.5)]">
             <div className="flex items-center gap-2 text-sm text-muted">
               <FileText className="size-4" /> الملف الكامل
             </div>
@@ -110,7 +107,7 @@ export default function IdeaDetail() {
             <button
               type="button"
               onClick={() => setOrderOpen(true)}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-3.5 font-display font-semibold text-paper shadow-[3px_3px_0_var(--color-ink)] transition-all hover:bg-accent-deep active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-accent py-4 font-display font-bold text-paper transition-all hover:bg-accent-deep active:scale-[0.98]"
             >
               <ShoppingBag className="size-4" /> اطلب الملف
             </button>
@@ -126,7 +123,7 @@ export default function IdeaDetail() {
 
       {others.length > 0 && (
         <Container className="pb-4">
-          <h2 className="mb-6 border-b-2 border-ink pb-3 text-2xl font-bold">ملفات قريبة</h2>
+          <h2 className="mb-8 text-4xl font-black">فرص قريبة</h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {others.map((i) => (
               <IdeaCard key={i.id} idea={i} />
@@ -142,7 +139,7 @@ export default function IdeaDetail() {
             <p className="text-xs text-muted">{idea.title}</p>
             <p className="font-display text-xl font-bold">{money(idea.price)}</p>
           </div>
-          <button type="button" onClick={() => setOrderOpen(true)} className="rounded-lg bg-accent px-6 py-3 font-display font-semibold text-paper">
+          <button type="button" onClick={() => setOrderOpen(true)} className="rounded-full bg-accent px-6 py-3 font-display font-bold text-paper">
             اطلب الملف
           </button>
         </div>

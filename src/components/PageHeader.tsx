@@ -1,15 +1,23 @@
 import type { ReactNode } from "react";
+import { motion } from "motion/react";
 import Container from "./Container";
 
-/** Top banner used by inner pages. */
+/** Dark top banner used by inner pages (sits under the floating header). */
 export default function PageHeader({ eyebrow, title, children }: { eyebrow: string; title: ReactNode; children?: ReactNode }) {
   return (
-    <section className="relative overflow-hidden border-b-2 border-ink">
-      <div className="ruled pointer-events-none absolute inset-0 opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-      <Container className="relative py-12 sm:py-16">
-        <p className="file-label mb-3 !text-accent">{eyebrow}</p>
-        <h1 className="text-4xl leading-tight font-bold sm:text-5xl">{title}</h1>
-        {children && <div className="mt-4 max-w-2xl text-lg leading-relaxed text-ink-soft">{children}</div>}
+    <section className="grid-lines relative overflow-hidden bg-ink text-paper">
+      <div className="pointer-events-none absolute -top-40 -left-40 size-[28rem] rounded-full bg-accent/25 blur-[120px]" />
+      <Container className="relative pt-32 pb-14 sm:pt-40 sm:pb-20">
+        <p className="mb-4 font-mono text-xs text-accent">/ {eyebrow}</p>
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="text-[2.6rem] leading-[1.1] font-black sm:text-7xl"
+        >
+          {title}
+        </motion.h1>
+        {children && <div className="mt-6 max-w-2xl text-lg leading-relaxed text-paper/70">{children}</div>}
       </Container>
     </section>
   );

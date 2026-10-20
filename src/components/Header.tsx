@@ -1,116 +1,97 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { Menu, X } from "lucide-react";
-import Container from "./Container";
+import { ArrowUpLeft, Menu, X } from "lucide-react";
 import Logo from "./Logo";
-import ButtonLink from "./ButtonLink";
 import { navLinks } from "./navLinks";
+import Instagram from "./InstagramIcon";
+import { site } from "../data/site";
 
+/** Floating pill navigation. */
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
 
   useEffect(() => setOpen(false), [pathname]);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
   }, [open]);
 
   return (
-    <header
-      className={`sticky top-0 z-40 transition-[background-color,border-color] duration-300 ${
-        scrolled || open ? "border-b border-line bg-paper/90 backdrop-blur-md" : "border-b border-transparent"
-      }`}
-    >
-      <Container className="flex h-16 items-center justify-between gap-4 sm:h-20">
+    <header className="pointer-events-none fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-5 sm:pt-4">
+      <div className="pointer-events-auto mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/85 py-2 pr-4 pl-2 shadow-[0_8px_30px_-12px_rgba(14,24,48,.35)] ring-1 ring-ink/10 backdrop-blur-xl">
         <Logo />
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="التنقل الرئيسي">
-          {navLinks.map((l) => (
+        <nav className="hidden items-center lg:flex" aria-label="التنقل الرئيسي">
+          {navLinks.slice(1).map((l) => (
             <NavLink
               key={l.to}
               to={l.to}
-              end={l.to === "/"}
               className={({ isActive }) =>
-                `relative rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive ? "text-ink" : "text-ink-soft hover:text-ink"
-                }`
+                `relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${isActive ? "text-paper" : "text-ink-soft hover:text-ink"}`
               }
             >
               {({ isActive }) => (
                 <>
-                  {l.label}
-                  {isActive && (
-                    <motion.span layoutId="nav-underline" className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded bg-accent" />
-                  )}
+                  {isActive && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-ink" transition={{ type: "spring", stiffness: 400, damping: 32 }} />}
+                  <span className="relative">{l.label}</span>
                 </>
               )}
             </NavLink>
           ))}
         </nav>
 
-        <div className="hidden lg:block">
-          <ButtonLink to="/custom" variant="ink" className="py-2.5">
-            اطلب مشروعك
-          </ButtonLink>
+        <div className="flex items-center gap-2">
+          <NavLink
+            to="/custom"
+            className="hidden items-center gap-1.5 rounded-full bg-accent px-5 py-2.5 font-display text-sm font-bold text-paper transition-colors hover:bg-accent-deep sm:inline-flex"
+          >
+            اطلب مشروعك <ArrowUpLeft className="size-4" />
+          </NavLink>
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="grid size-10 place-items-center rounded-full bg-ink text-paper lg:hidden"
+            aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
+            aria-expanded={open}
+          >
+            {open ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
         </div>
-
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="grid size-10 place-items-center rounded-lg border-2 border-ink lg:hidden"
-          aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
-          aria-expanded={open}
-        >
-          {open ? <X className="size-5" /> : <Menu className="size-5" />}
-        </button>
-      </Container>
+      </div>
 
       <AnimatePresence>
         {open && (
           <motion.nav
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="overflow-hidden border-t border-line bg-paper lg:hidden"
+            initial={{ clipPath: "circle(0% at 5% 0%)" }}
+            animate={{ clipPath: "circle(150% at 5% 0%)" }}
+            exit={{ clipPath: "circle(0% at 5% 0%)" }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="grid-lines pointer-events-auto fixed inset-0 -z-10 flex flex-col bg-ink px-6 pt-28 pb-8 text-paper lg:hidden"
             aria-label="التنقل على الموبايل"
           >
-            <Container className="flex h-[calc(100dvh-4rem)] flex-col py-6">
-              {navLinks.map((l, i) => (
-                <motion.div
-                  key={l.to}
-                  initial={{ opacity: 0, x: 16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.04 * i }}
+            {navLinks.map((l, i) => (
+              <motion.div key={l.to} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.05 }}>
+                <NavLink
+                  to={l.to}
+                  end={l.to === "/"}
+                  className={({ isActive }) =>
+                    `flex items-baseline justify-between border-b border-paper/10 py-4 font-display text-4xl font-extrabold ${isActive ? "text-accent" : "text-paper"}`
+                  }
                 >
-                  <NavLink
-                    to={l.to}
-                    end={l.to === "/"}
-                    className={({ isActive }) =>
-                      `flex items-center justify-between border-b border-dashed border-line py-4 font-display text-2xl font-semibold ${
-                        isActive ? "text-accent" : "text-ink"
-                      }`
-                    }
-                  >
-                    {l.label}
-                    <span className="font-mono text-xs text-muted">0{i + 1}</span>
-                  </NavLink>
-                </motion.div>
-              ))}
-              <ButtonLink to="/custom" variant="primary" className="mt-8 py-4 text-base">
+                  {l.label}
+                  <span className="font-mono text-xs text-paper/40">0{i + 1}</span>
+                </NavLink>
+              </motion.div>
+            ))}
+            <div className="mt-auto flex items-center justify-between gap-3">
+              <NavLink to="/custom" className="flex-1 rounded-full bg-accent py-4 text-center font-display font-bold">
                 اطلب مشروعك المخصص
-              </ButtonLink>
-            </Container>
+              </NavLink>
+              <a href={site.instagramUrl} target="_blank" rel="noreferrer" className="grid size-14 place-items-center rounded-full ring-1 ring-paper/30" aria-label="إنستغرام">
+                <Instagram className="size-5" />
+              </a>
+            </div>
           </motion.nav>
         )}
       </AnimatePresence>

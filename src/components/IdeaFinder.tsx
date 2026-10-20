@@ -15,9 +15,9 @@ const questions: { q: string; options: Option[] }[] = [
   {
     q: "كم الميزانية اللي بتقدر تبدأ فيها؟",
     options: [
-      { label: "أقل من 3,000$", hint: "بداية خفيفة", test: (i) => (i.capitalMin <= 3000 ? 3 : 0) },
-      { label: "3,000$ – 10,000$", hint: "مشروع صغير متكامل", test: (i) => (i.capitalMin <= 10000 && i.capitalMax >= 3000 ? 3 : 0) },
-      { label: "أكثر من 10,000$", hint: "مشروع أكبر", test: (i) => (i.capitalMax > 10000 ? 3 : 1) },
+      { label: "أقل من 10,000 ₪", hint: "بداية خفيفة", test: (i) => (i.capitalMin <= 10000 ? 3 : 0) },
+      { label: "10,000 – 35,000 ₪", hint: "مشروع صغير متكامل", test: (i) => (i.capitalMin <= 35000 && i.capitalMax >= 10000 ? 3 : 0) },
+      { label: "أكثر من 35,000 ₪", hint: "مشروع أكبر", test: (i) => (i.capitalMax > 35000 ? 3 : 1) },
     ],
   },
   {
@@ -53,8 +53,8 @@ export default function IdeaFinder({ ideas }: { ideas: Idea[] }) {
   }, [answers, done, ideas]);
 
   return (
-    <div className="overflow-hidden rounded-2xl border-2 border-ink bg-card">
-      <div className="flex items-center justify-between gap-3 border-b-2 border-ink bg-ink px-5 py-3 text-paper">
+    <div className="overflow-hidden rounded-3xl bg-card ring-1 ring-ink/10 shadow-[0_30px_60px_-35px_rgba(14,24,48,.5)]">
+      <div className="flex items-center justify-between gap-3 bg-ink px-5 py-4 text-paper">
         <span className="inline-flex items-center gap-2 font-display text-sm font-semibold">
           <Sparkles className="size-4 text-accent" /> لاقي فكرتك
         </span>
@@ -76,17 +76,17 @@ export default function IdeaFinder({ ideas }: { ideas: Idea[] }) {
               transition={{ duration: 0.25 }}
             >
               <p className="file-label mb-2">سؤال {step + 1} / {questions.length}</p>
-              <h3 className="mb-6 text-2xl font-bold">{questions[step].q}</h3>
+              <h3 className="mb-6 text-2xl font-extrabold sm:text-3xl">{questions[step].q}</h3>
               <div className="grid gap-3 sm:grid-cols-3">
                 {questions[step].options.map((o, oi) => (
                   <button
                     key={o.label}
                     type="button"
                     onClick={() => setAnswers((a) => [...a, oi])}
-                    className="group rounded-xl border-2 border-line bg-paper p-4 text-right transition-all hover:border-ink hover:shadow-[4px_4px_0_var(--color-accent)]"
+                    className="group rounded-2xl bg-paper p-4 text-right ring-1 ring-ink/10 transition-all hover:bg-ink hover:text-paper hover:ring-ink"
                   >
                     <span className="block font-display font-semibold">{o.label}</span>
-                    <span className="mt-1 block text-sm text-muted">{o.hint}</span>
+                    <span className="mt-1 block text-sm text-muted group-hover:text-paper/60">{o.hint}</span>
                   </button>
                 ))}
               </div>
@@ -110,10 +110,10 @@ export default function IdeaFinder({ ideas }: { ideas: Idea[] }) {
               </div>
               <div className="grid gap-6 md:grid-cols-2">
                 {results.map((idea) => (
-                  <IdeaCard key={idea.id} idea={idea} />
+                  <IdeaCard key={idea.id} idea={idea} notch="var(--color-card)" />
                 ))}
               </div>
-              <div className="mt-8 flex flex-col items-start gap-3 rounded-xl bg-accent-soft p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-8 flex flex-col items-start gap-3 rounded-2xl bg-accent-soft p-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-ink">ما لقيت اللي ببالك؟ منبنيلك فكرة من الصفر على مقاسك.</p>
                 <ButtonLink to="/custom" variant="ink" className="shrink-0">
                   اطلب مشروع مخصص <ArrowLeft className="size-4" />

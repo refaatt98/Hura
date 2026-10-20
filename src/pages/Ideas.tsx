@@ -14,9 +14,9 @@ import type { Difficulty } from "../types";
 
 const budgets = [
   { id: "all", label: "كل الميزانيات", test: () => true },
-  { id: "s", label: "أقل من 3k$", test: (min: number) => min < 3000 },
-  { id: "m", label: "3k–10k$", test: (min: number) => min >= 3000 && min <= 10000 },
-  { id: "l", label: "أكثر من 10k$", test: (min: number) => min > 10000 },
+  { id: "s", label: "أقل من 10k ₪", test: (min: number) => min < 10000 },
+  { id: "m", label: "10k–35k ₪", test: (min: number) => min >= 10000 && min <= 35000 },
+  { id: "l", label: "أكثر من 35k ₪", test: (min: number) => min > 35000 },
 ] as const;
 
 const sorts = {
@@ -31,7 +31,7 @@ const MAX_COMPARE = 3;
 
 const chip = (active: boolean) =>
   `shrink-0 rounded-full border-2 px-3.5 py-1.5 text-sm font-medium transition-colors ${
-    active ? "border-ink bg-ink text-paper" : "border-line bg-card text-ink-soft hover:border-ink hover:text-ink"
+    active ? "border-ink bg-ink text-paper" : "border-transparent bg-card text-ink-soft ring-1 ring-ink/10 hover:text-ink hover:ring-ink"
   }`;
 
 export default function Ideas() {
@@ -91,14 +91,14 @@ export default function Ideas() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="ابحث عن فكرة: قهوة، متجر، أطفال…"
-              className="w-full rounded-xl border-2 border-ink bg-card py-3 pr-11 pl-4 focus:shadow-[3px_3px_0_var(--color-accent)] focus:outline-none"
+              className="w-full rounded-full bg-card py-3.5 pr-11 pl-4 ring-1 ring-ink/15 focus:ring-2 focus:ring-ink focus:outline-none"
             />
           </label>
           <div className="flex gap-3">
             <button
               type="button"
               onClick={() => setFiltersOpen((v) => !v)}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-ink bg-card px-4 py-3 text-sm font-semibold lg:hidden"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-card px-4 py-3 text-sm font-semibold ring-1 ring-ink/15 lg:hidden"
               aria-expanded={filtersOpen}
             >
               <SlidersHorizontal className="size-4" /> فلاتر
@@ -109,7 +109,7 @@ export default function Ideas() {
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as keyof typeof sorts)}
-                className="h-full w-full rounded-xl border-2 border-ink bg-card px-4 py-3 text-sm font-semibold focus:outline-none"
+                className="h-full w-full rounded-full bg-card px-4 py-3 text-sm font-semibold ring-1 ring-ink/15 focus:outline-none"
               >
                 {Object.entries(sorts).map(([k, v]) => (
                   <option key={k} value={k}>{v}</option>
@@ -140,7 +140,7 @@ export default function Ideas() {
           </FilterRow>
         </div>
 
-        <div className="mt-8 mb-6 flex items-center justify-between border-b-2 border-ink pb-3 text-sm">
+        <div className="mt-8 mb-8 flex items-center justify-between border-b border-ink/15 pb-3 text-sm">
           <span className="font-medium">
             {loading ? "…" : <><span className="font-mono">{list.length}</span> ملف</>}
           </span>

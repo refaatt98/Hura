@@ -22,11 +22,11 @@ export default function ProfitCalculator({ idea }: { idea: Idea }) {
   const yearProfit = profit * 12 - capital;
 
   return (
-    <div className="rounded-2xl border-2 border-ink bg-card">
-      <div className="flex items-center gap-2 border-b-2 border-ink px-5 py-3">
+    <div className="overflow-hidden rounded-3xl bg-card ring-1 ring-ink/10">
+      <div className="flex items-center gap-2 bg-ink px-5 py-4 text-paper">
         <Calculator className="size-5 text-accent" />
         <h2 className="font-display font-bold">احسبها على وضعك</h2>
-        <span className="mr-auto text-xs text-muted">تقدير تقريبي</span>
+        <span className="mr-auto text-xs text-paper/50">تقدير تقريبي</span>
       </div>
       <div className="grid gap-6 p-5 md:grid-cols-2">
         <div className="space-y-6">
