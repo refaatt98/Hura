@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Design tokens — change colors & fonts here only.
+   Each token becomes a Tailwind utility (bg-paper, text-ink, font-display…)
+   ============================================================ */
+@theme {
+  /* Paper (backgrounds) */
+  --color-paper: #f4efe4;
+  --color-paper-deep: #ebe3d2;
+  --color-card: #fbf8f1;
+  --color-line: #d8cdb7;
+
+  /* Ink (text & dark surfaces) */
+  --color-ink: #14213d;
+  --color-ink-soft: #3b4763;
+  --color-muted: #6f6a5c;
+
+  /* Accent */
+  --color-accent: #e8590c;
+  --color-accent-deep: #c2470a;
+  --color-accent-soft: #fbe3d3;
+
+  /* Status */
+  --color-success: #2f7d4f;
+
+  /* Fonts */
+  --font-display: "Readex Pro", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-paper text-ink font-body antialiased;
+    overflow-x: clip;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display;
+    text-wrap: balance;
+  }
+  ::selection {
+    @apply bg-accent text-paper;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  /* Notebook ruled-paper texture */
+  .ruled {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0 31px,
+      color-mix(in srgb, var(--color-line) 55%, transparent) 31px 32px
+    );
+  }
+  /* Small uppercase-style label used on "opportunity files" */
+  .file-label {
+    @apply font-mono text-[11px] tracking-[0.18em] text-muted uppercase;
+  }
+}
