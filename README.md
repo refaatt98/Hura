@@ -32,8 +32,7 @@ src/
 ```
 
 - **تغيير الألوان والخطوط:** من `@theme` بأول `src/index.css`.
-- **صور إنستغرام:** بدّل الملفات بـ `public/instagram/` وعدّل `src/data/instagram.ts`.
-- **معلومات التواصل والوصف:** `src/data/site.ts`.
+- **المحتوى:** كله بيتعدّل من `/admin` (مش من الكود).
 
 ## الصفحات
 | الرابط | الصفحة |
@@ -47,13 +46,16 @@ src/
 
 ## قاعدة البيانات (Supabase)
 - الموقع مربوط بمشروع Supabase اسمه `hura`. كل القراءة والكتابة بتمر من `src/lib/api.ts`.
-- الجداول: `ideas`, `workshops`, `idea_orders`, `custom_requests`, `workshop_registrations`, `contact_messages`, `admins`.
+- الجداول: `site_settings`, `instagram_posts`, `ideas`, `workshops`, `idea_orders`, `custom_requests`, `workshop_registrations`, `contact_messages`, `admins`.
+- الصور المرفوعة بتنحفظ بـ Storage bucket اسمه `media`.
 - ملفات قاعدة البيانات بـ `supabase/`: الجداول (`migrations/`) والبيانات الأولية (`seed.sql`).
 - حجز الورشة بيمر من دالة `register_for_workshop` بتتأكد من المقاعد وبتحجز بخطوة وحدة.
 - الرابط والمفتاح العام (publishable) موجودين بـ `src/lib/supabase.ts`. هاد آمن لأنهم أصلاً عامّين.
   **لا تحط أبداً service_role key أو توكن `sbp_...` بالكود.**
 
 ## لوحة الإدارة (`/admin`)
+من لوحة الإدارة بتتحكم بكل المحتوى: إعدادات الموقع (العنوان، الوصف، التواصل، الأسئلة الشائعة)، منشورات إنستغرام مع رفع صور، الأفكار، الورشات، وكل الطلبات.
+
 ⚠️ **حالياً بدون تسجيل دخول، بطلب صاحب المشروع.** أي حدا بيعرف الرابط بيقدر يشوف الطلبات (أسماء وأرقام) ويعدّل ويحذف.
 لإرجاع الحماية: شغّل `supabase/restore_admin_protection.sql` وارجع شاشة تسجيل الدخول (Supabase Auth). الإيميلات المسموحة بجدول `admins`.
 

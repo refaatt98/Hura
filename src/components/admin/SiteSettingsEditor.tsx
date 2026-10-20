@@ -1,0 +1,108 @@
+import { useEffect, useState, type FormEvent } from "react";
+import { CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
+import type { SiteInfo } from "../../types";
+import { getSiteInfo, saveSiteInfo } from "../../lib/api";
+import { useSite } from "../SiteProvider";
+import Skeleton from "../Skeleton";
+import { Field, TextArea } from "../Field";
+
+export default function SiteSettingsEditor() {
+  const { reload } = useSite();
+  const [s, setS] = useState<SiteInfo | null>(null);
+  const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  useEffect(() => {
+    getSiteInfo().then(setS);
+  }, []);
+
+  if (!s) return <Skeleton className="h-96" />;
+
+  const set = <K extends keyof SiteInfo>(k: K, v: SiteInfo[K]) => {
+    setS({ ...s, [k]: v });
+    setState("idle");
+  };
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!s) return;
+    setState("saving");
+    try {
+      await saveSiteInfo(s);
+      reload();
+      setState("saved");
+    } catch {
+      setState("error");
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-6 pb-24">
+      <Section title="القسم الأول بالرئيسية">
+        <Field label="الشارة الصغيرة فوق العنوان" value={s.heroBadge} onChange={(e) => set("heroBadge", e.target.value)} />
+        <Field label="السطر الأول من العنوان" required value={s.heroTitle} onChange={(e) => set("heroTitle", e.target.value)} />
+        <Field label="بداية السطر الثاني" value={s.heroPrefix} onChange={(e) => set("heroPrefix", e.target.value)} hint="بتيجي قبل الكلمة اللي بتتبدّل" />
+        <TextArea
+          label="الكلمات اللي بتتبدّل (كل كلمة بسطر)"
+          value={s.heroWords.join("\n")}
+          onChange={(e) => set("heroWords", e.target.value.split("\n"))}
+          className="[&_textarea]:min-h-24"
+        />
+        <TextArea label="الوصف التعريفي" required value={s.about} onChange={(e) => set("about", e.target.value)} />
+      </Section>
+
+      <Section title="معلومات التواصل">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="حساب إنستغرام" value={s.instagramHandle} onChange={(e) => set("instagramHandle", e.target.value)} dir="ltr" className="[&_input]:text-right" hint="بدون @ — مثلاً hura_business_projects" />
+          <Field label="رقم الواتساب" value={s.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} dir="ltr" className="[&_input]:text-right" hint="مع رمز الدولة، مثلاً ‎+970599123456" />
+          <Field label="الإيميل" type="email" value={s.email} onChange={(e) => set("email", e.target.value)} dir="ltr" className="[&_input]:text-right" />
+          <Field label="المدينة" value={s.city} onChange={(e) => set("city", e.target.value)} />
+        </div>
+        <Field label="الجملة التعريفية (بالفوتر)" value={s.tagline} onChange={(e) => set("tagline", e.target.value)} />
+      </Section>
+
+      <Section title="الأسئلة الشائعة (صفحة التواصل)">
+        {s.faqs.map((f, i) => (
+          <div key={i} className="relative space-y-3 rounded-2xl bg-paper p-4 pl-12">
+            <button
+              type="button"
+              onClick={() => set("faqs", s.faqs.filter((_, k) => k !== i))}
+              className="absolute top-3 left-3 grid size-8 place-items-center rounded-full text-accent-deep hover:bg-accent-soft"
+              aria-label="حذف السؤال"
+            >
+              <Trash2 className="size-4" />
+            </button>
+            <Field label={`سؤال ${i + 1}`} value={f.q} onChange={(e) => set("faqs", s.faqs.map((x, k) => (k === i ? { ...x, q: e.target.value } : x)))} />
+            <TextArea label="الجواب" value={f.a} onChange={(e) => set("faqs", s.faqs.map((x, k) => (k === i ? { ...x, a: e.target.value } : x)))} className="[&_textarea]:min-h-20" />
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => set("faqs", [...s.faqs, { q: "", a: "" }])}
+          className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-ink/20 hover:ring-ink"
+        >
+          <Plus className="size-4" /> سؤال جديد
+        </button>
+      </Section>
+
+      {/* sticky save bar */}
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-ink/10 bg-card/95 p-3 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-end gap-3 px-1 sm:px-6">
+          {state === "saved" && <span className="inline-flex items-center gap-1.5 text-sm text-success"><CheckCircle2 className="size-4" /> انحفظ</span>}
+          {state === "error" && <span className="text-sm text-accent-deep">ما انحفظ، جرّب مرة ثانية</span>}
+          <button type="submit" disabled={state === "saving"} className="inline-flex items-center gap-2 rounded-full bg-accent px-8 py-3 font-display font-bold text-paper hover:bg-accent-deep disabled:opacity-70">
+            {state === "saving" && <Loader2 className="size-4 animate-spin" />} حفظ التغييرات
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-4 rounded-2xl bg-card p-5 ring-1 ring-ink/10">
+      <h2 className="text-lg font-black">{title}</h2>
+      {children}
+    </section>
+  );
+}

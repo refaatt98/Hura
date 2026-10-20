@@ -13,3 +13,6 @@ insert into public.workshops (id,title,summary,description,date,duration_hours,m
 ('instagram-sales','إنستغرام كقناة بيع','حوّل حسابك من معرض صور إلى مصدر طلبات ثابت.','ورشة عن بناء محتوى يبيع، وتحويل المتابعين إلى عملاء، وإدارة الطلبات عبر الرسائل وواتساب.','2026-12-12T17:00:00',3,'أونلاين','Zoom',70,50,9,'فريق Hura',array['هوية الحساب','محتوى يبيع','من الرسالة إلى الطلب']::text[])
 on conflict (id) do nothing;
 
+
+-- Site settings, Instagram posts and extra sample content are managed from /admin.
+-- (Initial values were inserted once; see the admin page to edit them.)

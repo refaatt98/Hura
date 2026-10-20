@@ -25,6 +25,7 @@ const toLocal = (iso: string) => (iso ? iso.slice(0, 16) : "");
 
 export default function WorkshopEditor({ workshop, onSaved }: { workshop?: Workshop; onSaved: (w: Workshop) => void }) {
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const base = workshop ?? blank;
 
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -49,9 +50,15 @@ export default function WorkshopEditor({ workshop, onSaved }: { workshop?: Works
       agenda: s("agenda").split("\n").map((x) => x.trim()).filter(Boolean),
     };
     setBusy(true);
-    await saveWorkshop(saved);
-    setBusy(false);
-    onSaved(saved);
+    setError("");
+    try {
+      await saveWorkshop(saved);
+      onSaved(saved);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "ما انحفظ، جرّب مرة ثانية.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -74,6 +81,7 @@ export default function WorkshopEditor({ workshop, onSaved }: { workshop?: Works
       <Field label="عدد المقاعد" name="seats" type="number" min={1} required defaultValue={base.seats} />
       <Field label="المقاعد المحجوزة" name="seatsTaken" type="number" min={0} required defaultValue={base.seatsTaken} />
       <TextArea label="البرنامج (كل بند بسطر)" name="agenda" defaultValue={base.agenda.join("\n")} className="sm:col-span-2" />
+      {error && <p className="text-sm text-accent-deep sm:col-span-2">{error}</p>}
       <button type="submit" disabled={busy} className="flex items-center justify-center gap-2 rounded-full bg-accent py-3.5 font-display font-bold text-paper hover:bg-accent-deep disabled:opacity-70 sm:col-span-2">
         {busy && <Loader2 className="size-4 animate-spin" />} حفظ
       </button>

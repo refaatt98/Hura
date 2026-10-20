@@ -6,12 +6,12 @@
  * The `to*` / `from*` helpers below translate between the two.
  */
 import { supabase } from "./supabase";
-import { instagramPosts } from "../data/instagram";
-import { site } from "../data/site";
+import { defaultSite } from "../data/site";
 import type {
   ContactMessage,
   CustomRequest,
   Difficulty,
+  Faq,
   Idea,
   IdeaOrder,
   InstagramPost,
@@ -42,14 +42,96 @@ function fail(error: { message: string; code?: string } | null): never {
 /** Empty strings become null in the database. */
 const clean = (s?: string) => (s && s.trim() ? s.trim() : null);
 
-/* ───────── site content (static for now) ───────── */
+/* ───────── site settings ───────── */
+
+const igUrl = (handle: string) => (handle ? `https://www.instagram.com/${handle.replace(/^@/, "")}/` : "");
 
 export async function getSiteInfo(): Promise<SiteInfo> {
-  return site;
+  const { data, error } = await supabase.from("site_settings").select("*").eq("id", 1).maybeSingle();
+  if (error) fail(error);
+  if (!data) return defaultSite;
+  const handle = String(data.instagram_handle ?? "").replace(/^@/, "");
+  return {
+    name: data.name,
+    tagline: data.tagline,
+    about: data.about,
+    instagramHandle: handle,
+    instagramUrl: igUrl(handle),
+    whatsapp: data.whatsapp,
+    email: data.email,
+    city: data.city,
+    heroBadge: data.hero_badge,
+    heroTitle: data.hero_title,
+    heroPrefix: data.hero_prefix,
+    heroWords: data.hero_words ?? [],
+    faqs: (data.faqs as Faq[]) ?? [],
+  };
 }
 
-export async function getInstagramPosts(): Promise<InstagramPost[]> {
-  return instagramPosts;
+export async function saveSiteInfo(s: SiteInfo): Promise<void> {
+  const { error } = await supabase
+    .from("site_settings")
+    .update({
+      name: s.name,
+      tagline: s.tagline,
+      about: s.about,
+      instagram_handle: s.instagramHandle.replace(/^@/, "").trim(),
+      whatsapp: s.whatsapp.trim(),
+      email: s.email.trim(),
+      city: s.city.trim(),
+      hero_badge: s.heroBadge,
+      hero_title: s.heroTitle,
+      hero_prefix: s.heroPrefix,
+      hero_words: s.heroWords.filter(Boolean),
+      faqs: s.faqs.filter((f) => f.q.trim() && f.a.trim()),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", 1);
+  if (error) fail(error);
+}
+
+/* ───────── Instagram posts ───────── */
+
+const toPost = (r: Row): InstagramPost => ({
+  id: r.id as string,
+  image: r.image as string,
+  title: r.title as string,
+  caption: r.caption as string,
+  url: r.url as string,
+  sort: r.sort as number,
+});
+
+export async function getInstagramPosts(limit?: number): Promise<InstagramPost[]> {
+  let q = supabase.from("instagram_posts").select("*").order("sort").order("created_at", { ascending: false });
+  if (limit) q = q.limit(limit);
+  const { data, error } = await q;
+  if (error) fail(error);
+  return data.map(toPost);
+}
+
+/** Create (no id) or update an Instagram post. */
+export async function saveInstagramPost(p: Omit<InstagramPost, "id"> & { id?: string }): Promise<void> {
+  const row = { image: p.image, title: p.title, caption: p.caption, url: p.url, sort: p.sort };
+  const { error } = p.id
+    ? await supabase.from("instagram_posts").update(row).eq("id", p.id)
+    : await supabase.from("instagram_posts").insert(row);
+  if (error) fail(error);
+}
+
+export async function deleteInstagramPost(id: string): Promise<void> {
+  const { error } = await supabase.from("instagram_posts").delete().eq("id", id);
+  if (error) fail(error);
+}
+
+/** Uploads an image to the public "media" bucket and returns its URL. */
+export async function uploadImage(file: File): Promise<string> {
+  if (!file.type.startsWith("image/")) throw new Error("الملف لازم يكون صورة.");
+  if (file.size > 5 * 1024 * 1024) throw new Error("الصورة أكبر من 5MB.");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabase.storage.from("media").upload(path, file, { contentType: file.type, upsert: false });
+  if (error) throw new Error("ما قدرنا نرفع الصورة، جرّب مرة ثانية.");
+  return supabase.storage.from("media").getPublicUrl(path).data.publicUrl;
 }
 
 /* ───────── ideas ───────── */

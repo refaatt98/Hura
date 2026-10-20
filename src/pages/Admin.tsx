@@ -5,6 +5,8 @@ import {
   ExternalLink,
   FileText,
   Inbox,
+  Image as ImageIcon,
+  Settings,
   LayoutDashboard,
   Mail,
   Pencil,
@@ -24,6 +26,8 @@ import SubmissionsPanel from "../components/admin/SubmissionsPanel";
 import IdeaEditor from "../components/admin/IdeaEditor";
 import WorkshopEditor from "../components/admin/WorkshopEditor";
 import StatusBadge from "../components/admin/StatusBadge";
+import InstagramManager from "../components/admin/InstagramManager";
+import SiteSettingsEditor from "../components/admin/SiteSettingsEditor";
 import {
   deleteIdea,
   deleteWorkshop,
@@ -35,7 +39,7 @@ import {
 import { formatDate, money } from "../lib/format";
 import type { Idea, RequestStatus, SubmissionKind, Workshop } from "../types";
 
-type Tab = "overview" | SubmissionKind | "ideas" | "workshops";
+type Tab = "overview" | SubmissionKind | "ideas" | "workshops" | "instagram" | "settings";
 
 const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
@@ -45,6 +49,8 @@ const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: "messages", label: "الرسائل", icon: Mail },
   { id: "ideas", label: "إدارة الأفكار", icon: FileText },
   { id: "workshops", label: "إدارة الورشات", icon: CalendarDays },
+  { id: "instagram", label: "منشورات إنستغرام", icon: ImageIcon },
+  { id: "settings", label: "إعدادات الموقع", icon: Settings },
 ];
 
 const submissionKinds: SubmissionKind[] = ["orders", "custom", "registrations", "messages"];
@@ -111,6 +117,8 @@ export default function Admin() {
           {submissionKinds.includes(tab as SubmissionKind) && <SubmissionsPanel key={tab} kind={tab as SubmissionKind} onChange={refreshCounts} />}
           {tab === "ideas" && <IdeasManager />}
           {tab === "workshops" && <WorkshopsManager />}
+          {tab === "instagram" && <InstagramManager />}
+          {tab === "settings" && <SiteSettingsEditor />}
         </main>
       </div>
     </div>

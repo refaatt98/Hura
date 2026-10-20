@@ -47,6 +47,12 @@ export interface InstagramPost {
   title: string;
   caption: string;
   url: string;
+  sort: number;
+}
+
+export interface Faq {
+  q: string;
+  a: string;
 }
 
 export interface SiteInfo {
@@ -54,10 +60,16 @@ export interface SiteInfo {
   tagline: string;
   about: string;
   instagramHandle: string;
+  /** Derived from instagramHandle */
   instagramUrl: string;
   whatsapp: string;
   email: string;
   city: string;
+  heroBadge: string;
+  heroTitle: string;
+  heroPrefix: string;
+  heroWords: string[];
+  faqs: Faq[];
 }
 
 export type RequestStatus = "جديد" | "قيد المتابعة" | "مكتمل";

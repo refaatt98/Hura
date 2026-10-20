@@ -5,12 +5,13 @@ import { ArrowUpLeft, Menu, X } from "lucide-react";
 import Logo from "./Logo";
 import { navLinks } from "./navLinks";
 import Instagram from "./InstagramIcon";
-import { site } from "../data/site";
+import { useSite } from "./SiteProvider";
 
 /** Floating pill navigation. */
 export default function Header() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+  const { site } = useSite();
 
   useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {

@@ -3,10 +3,11 @@ import { ArrowUpLeft, Mail, MessageCircle } from "lucide-react";
 import Instagram from "./InstagramIcon";
 import Container from "./Container";
 import { navLinks } from "./navLinks";
-import { site } from "../data/site";
+import { useSite } from "./SiteProvider";
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { site } = useSite();
   return (
     <footer className="grid-lines relative mt-28 overflow-hidden bg-ink text-paper">
       <Container className="grid gap-12 pt-20 pb-10 md:grid-cols-[1.5fr_1fr_1fr]">

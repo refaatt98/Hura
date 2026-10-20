@@ -6,19 +6,14 @@ import PageHeader from "../components/PageHeader";
 import Instagram from "../components/InstagramIcon";
 import { Field, TextArea } from "../components/Field";
 import { createContactMessage } from "../lib/api";
-import { site } from "../data/site";
+import { useSite } from "../components/SiteProvider";
 
 const subjects = ["سؤال عام", "فكرة جاهزة", "مشروع مخصص", "ورشة", "تعاون"];
 
-const faqs = [
-  { q: "شو بالضبط بستلم لما أشتري فكرة جاهزة؟", a: "ملف PDF فيه دراسة مختصرة للفكرة: رأس المال المطلوب، قائمة المعدات والموردين، حساب التكاليف والتسعير، وخطة إطلاق خطوة بخطوة — مع جلسة أسئلة قصيرة معنا." },
-  { q: "شو الفرق بين الفكرة الجاهزة والمشروع المخصص؟", a: "الفكرة الجاهزة ملف مدروس مسبقاً وبتستلمه فوراً. المشروع المخصص منبنيه من الصفر حسب ميزانيتك ومدينتك وخبرتك، وبياخد وقت أطول لأنه فيه بحث خاص فيك." },
-  { q: "هل الأرقام بالملفات مضمونة؟", a: "الأرقام تقديرات مبنية على بحث وتجارب حقيقية، بس كل سوق وكل موقع إله ظروفه. منساعدك تعدّل الأرقام على وضعك." },
-  { q: "كيف بدفع؟", a: "حالياً بعد ما تبعت الطلب منتواصل معك ومنتفق على طريقة الدفع المناسبة إلك." },
-  { q: "الورشات بتنفع إذا لسا ما عندي فكرة؟", a: "أكيد. ورشة «من الفكرة إلى الخطة» مصممة بالضبط لهيك حالة." },
-];
 
 export default function Contact() {
+  const { site } = useSite();
+  const faqs = site.faqs;
   const [subject, setSubject] = useState(subjects[0]);
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [open, setOpen] = useState<number | null>(0);
@@ -147,6 +142,7 @@ export default function Contact() {
       </Container>
 
       {/* FAQ */}
+      {faqs.length > 0 && (
       <Container className="pt-6">
         <p className="mb-3 font-mono text-xs text-accent-deep">/ أسئلة شائعة</p>
         <h2 className="mb-8 text-4xl font-black sm:text-5xl">قبل ما تسأل…</h2>
@@ -175,6 +171,7 @@ export default function Contact() {
           ))}
         </div>
       </Container>
+      )}
     </>
   );
 }

@@ -15,7 +15,8 @@ import IdeaFinder from "../components/IdeaFinder";
 import WorkshopCard from "../components/WorkshopCard";
 import Skeleton from "../components/Skeleton";
 import { useAsync } from "../lib/useAsync";
-import { getIdeas, getInstagramPosts, getSiteInfo, getUpcomingWorkshops } from "../lib/api";
+import { getIdeas, getInstagramPosts, getUpcomingWorkshops } from "../lib/api";
+import { useSite } from "../components/SiteProvider";
 
 const services = [
   { n: "01", title: "أفكار جاهزة", text: "ملفات فرص بأرقامها: رأس المال، الاسترداد، الموردين، وخطة الإطلاق.", to: "/ideas" },
@@ -26,11 +27,10 @@ const services = [
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export default function Home() {
-  const siteQ = useAsync(getSiteInfo);
-  const postsQ = useAsync(getInstagramPosts);
+  const { site } = useSite();
+  const postsQ = useAsync(() => getInstagramPosts(3));
   const ideasQ = useAsync(getIdeas);
   const workshopsQ = useAsync(() => getUpcomingWorkshops(2));
-  const site = siteQ.data;
   const ideas = ideasQ.data ?? [];
   const featured = ideas.filter((i) => i.featured);
 
@@ -50,7 +50,7 @@ export default function Home() {
               className="mb-6 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-xs font-medium ring-1 ring-ink/10"
             >
               <span className="size-2 animate-pulse rounded-full bg-signal" />
-              Hura Business · Hura Projects
+              {site.heroBadge}
             </motion.p>
 
             <h1 className="text-[2.75rem] leading-[1.08] font-black sm:text-7xl lg:text-[3.7rem] xl:text-[4rem]">
@@ -60,7 +60,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.7, ease }}
               >
-                لا تبدأ من الصفر.
+                {site.heroTitle}
               </motion.span>
               <motion.span
                 className="block"
@@ -68,7 +68,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25, duration: 0.7, ease }}
               >
-                ابدأ من <br /><RotatingWord words={["فرصة مدروسة", "خطة واضحة", "أرقام حقيقية"]} className="text-accent" />
+                {site.heroPrefix} <br />{site.heroWords.length > 0 && <RotatingWord key={site.heroWords.join("|")} words={site.heroWords} className="text-accent" />}
               </motion.span>
             </h1>
 
@@ -129,11 +129,9 @@ export default function Home() {
               </>
             }
             action={
-              site && (
-                <ButtonLink to={site.instagramUrl} external variant="ghost">
-                  <Instagram className="size-4" /> <span dir="ltr">@{site.instagramHandle}</span>
-                </ButtonLink>
-              )
+              <ButtonLink to={site.instagramUrl} external variant="ghost">
+                <Instagram className="size-4" /> <span dir="ltr">@{site.instagramHandle}</span>
+              </ButtonLink>
             }
           />
         </Container>

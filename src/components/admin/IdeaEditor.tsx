@@ -23,6 +23,7 @@ const blank: Idea = {
 
 export default function IdeaEditor({ idea, onSaved }: { idea?: Idea; onSaved: (i: Idea) => void }) {
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const base = idea ?? blank;
 
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -48,9 +49,15 @@ export default function IdeaEditor({ idea, onSaved }: { idea?: Idea; onSaved: (i
       featured: f.get("featured") === "on",
     };
     setBusy(true);
-    await saveIdea(saved);
-    setBusy(false);
-    onSaved(saved);
+    setError("");
+    try {
+      await saveIdea(saved);
+      onSaved(saved);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "ما انحفظ، جرّب مرة ثانية.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -79,6 +86,7 @@ export default function IdeaEditor({ idea, onSaved }: { idea?: Idea; onSaved: (i
         <input type="checkbox" name="featured" defaultChecked={base.featured} className="size-4 accent-[var(--color-accent)]" />
         فكرة مميزة (بتظهر بالرئيسية)
       </label>
+      {error && <p className="text-sm text-accent-deep sm:col-span-2">{error}</p>}
       <button type="submit" disabled={busy} className="flex items-center justify-center gap-2 rounded-full bg-accent py-3.5 font-display font-bold text-paper hover:bg-accent-deep disabled:opacity-70 sm:col-span-2">
         {busy && <Loader2 className="size-4 animate-spin" />} حفظ
       </button>
