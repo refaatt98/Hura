@@ -25,3 +25,6 @@ export const compactRange = (min: number, max: number) => `${k(min)}–${k(max)}
 
 export const hoursLabel = (n: number) =>
   n === 1 ? "ساعة" : n === 2 ? "ساعتان" : n <= 10 ? `${n} ساعات` : `${n} ساعة`;
+
+export const monthsLabel = (n: number) =>
+  n === 1 ? "شهر" : n === 2 ? "شهران" : n <= 10 ? `${n} أشهر` : `${n} شهر`;

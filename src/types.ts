@@ -59,3 +59,19 @@ export interface SiteInfo {
   email: string;
   city: string;
 }
+
+export type RequestStatus = "جديد" | "قيد المتابعة" | "مكتمل";
+
+export interface IdeaOrder {
+  id: string;
+  ideaId: string;
+  ideaTitle: string;
+  name: string;
+  phone: string;
+  email?: string;
+  notes?: string;
+  createdAt: string;
+  status: RequestStatus;
+}
+
+export type NewIdeaOrder = Pick<IdeaOrder, "ideaId" | "ideaTitle" | "name" | "phone" | "email" | "notes">;

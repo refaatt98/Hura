@@ -60,8 +60,8 @@
       color-mix(in srgb, var(--color-line) 55%, transparent) 31px 32px
     );
   }
-  /* Small uppercase-style label used on "opportunity files" */
+  /* Small label used on "opportunity files" (no letter-spacing: it breaks Arabic joining) */
   .file-label {
-    @apply font-mono text-[11px] tracking-[0.18em] text-muted uppercase;
+    @apply text-xs font-medium text-muted;
   }
 }

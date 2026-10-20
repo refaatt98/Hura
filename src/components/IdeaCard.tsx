@@ -1,13 +1,20 @@
 import { Link } from "react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check, Plus } from "lucide-react";
 import type { Idea } from "../types";
-import { compactRange, money } from "../lib/format";
+import { compactRange, money, monthsLabel } from "../lib/format";
 import DifficultyMeter from "./DifficultyMeter";
 
 /** An idea presented as an "opportunity file" folder. */
-export default function IdeaCard({ idea }: { idea: Idea }) {
+interface Props {
+  idea: Idea;
+  /** When provided, shows a "compare" toggle on the card. */
+  compare?: { selected: boolean; disabled: boolean; onToggle: () => void };
+}
+
+export default function IdeaCard({ idea, compare }: Props) {
   return (
-    <Link to={`/ideas/${idea.id}`} className="group relative block pt-5">
+    <div className="relative h-full">
+    <Link to={`/ideas/${idea.id}`} className="group relative block h-full pt-5">
       {/* folder tab */}
       <span className="absolute top-0 right-5 rounded-t-lg border-2 border-b-0 border-ink bg-card px-3 pt-1 pb-1.5 font-mono text-[11px] tracking-widest text-ink-soft">
         {idea.code}
@@ -27,7 +34,7 @@ export default function IdeaCard({ idea }: { idea: Idea }) {
           </div>
           <div className="border-x border-dashed border-line">
             <dt className="text-[11px] text-muted">الاسترداد</dt>
-            <dd className="font-mono text-sm font-medium">{idea.paybackMonths} شهر</dd>
+            <dd className="font-mono text-sm font-medium">{monthsLabel(idea.paybackMonths)}</dd>
           </div>
           <div>
             <dt className="text-[11px] text-muted">الهامش</dt>
@@ -44,5 +51,20 @@ export default function IdeaCard({ idea }: { idea: Idea }) {
         </div>
       </article>
     </Link>
+    {compare && (
+      <button
+        type="button"
+        onClick={compare.onToggle}
+        disabled={compare.disabled && !compare.selected}
+        aria-pressed={compare.selected}
+        className={`absolute top-0 left-4 inline-flex items-center gap-1 rounded-t-lg border-2 border-b-0 px-2.5 pt-1 pb-1.5 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+          compare.selected ? "border-accent bg-accent text-paper" : "border-ink bg-paper text-ink hover:bg-accent-soft"
+        }`}
+      >
+        {compare.selected ? <Check className="size-3.5" /> : <Plus className="size-3.5" />}
+        قارن
+      </button>
+    )}
+    </div>
   );
 }

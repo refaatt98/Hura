@@ -1,6 +1,8 @@
 import { Route, Routes } from "react-router";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
+import Ideas from "./pages/Ideas";
+import IdeaDetail from "./pages/IdeaDetail";
 import ComingSoon from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 
@@ -9,8 +11,8 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Home />} />
-        <Route path="ideas" element={<ComingSoon title="أفكار المشاريع" />} />
-        <Route path="ideas/:id" element={<ComingSoon title="ملف الفرصة" />} />
+        <Route path="ideas" element={<Ideas />} />
+        <Route path="ideas/:id" element={<IdeaDetail />} />
         <Route path="custom" element={<ComingSoon title="مشروع مخصص" />} />
         <Route path="workshops" element={<ComingSoon title="الورشات" />} />
         <Route path="workshops/:id" element={<ComingSoon title="تفاصيل الورشة" />} />
