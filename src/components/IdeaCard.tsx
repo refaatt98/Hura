@@ -20,7 +20,7 @@ export default function IdeaCard({ idea, compare, notch = "var(--color-paper)" }
     <div className="relative h-full">
       <Link
         to={`/ideas/${idea.id}`}
-        className="group flex h-full flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-ink/10 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_24px_50px_-20px_rgba(14,24,48,.45)] hover:ring-ink"
+        className="group flex h-full flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-ink/10 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_24px_50px_-20px_rgb(var(--shadow-rgb)/.45)] hover:ring-ink"
       >
         {/* main part */}
         <div className="flex flex-1 flex-col p-5 pb-6">

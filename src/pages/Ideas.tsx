@@ -203,7 +203,7 @@ export default function Ideas() {
             exit={{ y: 100 }}
             className="fixed inset-x-0 bottom-0 z-30 p-3 sm:p-5"
           >
-            <div className="mx-auto flex max-w-3xl items-center gap-3 rounded-2xl border-2 border-ink bg-ink p-3 text-paper shadow-[0_-8px_30px_rgba(20,33,61,.25)]">
+            <div className="mx-auto flex max-w-3xl items-center gap-3 rounded-2xl border-2 border-ink bg-ink p-3 text-paper shadow-[0_-8px_30px_rgb(var(--shadow-rgb)/.25)]">
               <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto">
                 {compared.map((i) => (
                   <button

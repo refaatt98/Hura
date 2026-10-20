@@ -93,7 +93,7 @@ export default function WorkshopDetail() {
         </div>
 
         <aside id="register" className="lg:sticky lg:top-28 lg:self-start">
-          <div className="overflow-hidden rounded-3xl bg-card ring-1 ring-ink/10 shadow-[0_30px_60px_-30px_rgba(14,24,48,.5)]">
+          <div className="overflow-hidden rounded-3xl bg-card ring-1 ring-ink/10 shadow-[0_30px_60px_-30px_rgb(var(--shadow-rgb)/.5)]">
             <div className="bg-ink p-5 text-paper">
               <div className="flex items-center justify-between text-sm">
                 <span className="inline-flex items-center gap-1.5"><Users className="size-4" /> {t("workshop.seats")}</span>

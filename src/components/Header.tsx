@@ -22,7 +22,7 @@ export default function Header() {
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-5 sm:pt-4">
-      <div className="pointer-events-auto mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/85 py-2 pr-4 pl-2 shadow-[0_8px_30px_-12px_rgba(14,24,48,.35)] ring-1 ring-ink/10 backdrop-blur-xl">
+      <div className="pointer-events-auto mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-card/85 py-2 pr-4 pl-2 shadow-[0_8px_30px_-12px_rgb(var(--shadow-rgb)/.35)] ring-1 ring-ink/10 backdrop-blur-xl">
         <Logo />
 
         <nav className="hidden items-center lg:flex" aria-label="التنقل الرئيسي">

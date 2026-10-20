@@ -113,7 +113,7 @@ export default function Home() {
         <div className="absolute inset-x-[-5%] top-10 rotate-[2deg] bg-ink text-paper/80">
           <Ticker ideas={[...ideas].reverse()} className="[--marquee-duration:55s]" />
         </div>
-        <div className="absolute inset-x-[-5%] top-12 -rotate-[2.5deg] bg-accent text-paper shadow-[0_10px_30px_-10px_rgba(255,91,31,.6)]">
+        <div className="absolute inset-x-[-5%] top-12 -rotate-[2.5deg] bg-accent text-paper shadow-[0_10px_30px_-10px_rgb(var(--accent-rgb)/.6)]">
           <Ticker ideas={ideas} />
         </div>
       </div>
@@ -249,7 +249,7 @@ export default function Home() {
 
       {/* ───────── Custom project CTA ───────── */}
       <section className="pt-10">
-        <Link to="/custom" className="group block overflow-hidden border-y-2 border-ink bg-accent py-6 text-ink sm:py-10">
+        <Link to="/custom" className="group block overflow-hidden border-y-2 border-ink bg-accent py-6 text-paper sm:py-10">
           <div className="flex w-max animate-marquee [--marquee-duration:30s] group-hover:[animation-play-state:paused]">
             {[0, 1].map((k) => (
               <div key={k} className="flex shrink-0 items-center" aria-hidden={k === 1}>

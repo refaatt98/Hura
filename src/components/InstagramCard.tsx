@@ -25,7 +25,7 @@ export default function InstagramCard({ post, index }: { post: InstagramPost; in
         y.set(0);
       }}
     >
-      <motion.div style={{ rotateX: rx, rotateY: ry }} className="relative overflow-hidden rounded-3xl bg-ink shadow-[0_30px_60px_-30px_rgba(14,24,48,.6)]">
+      <motion.div style={{ rotateX: rx, rotateY: ry }} className="relative overflow-hidden rounded-3xl bg-ink shadow-[0_30px_60px_-30px_rgb(var(--shadow-rgb)/.6)]">
         <div className="aspect-[4/5]">
           <img src={post.image} alt={post.title} loading="lazy" className="size-full object-cover transition-transform duration-700 group-hover:scale-105" />
         </div>

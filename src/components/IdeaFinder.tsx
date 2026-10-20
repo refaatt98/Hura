@@ -51,14 +51,14 @@ export default function IdeaFinder({ ideas }: { ideas: Idea[] }) {
   }, [answers, done, ideas]);
 
   return (
-    <div className="overflow-hidden rounded-3xl bg-card ring-1 ring-ink/10 shadow-[0_30px_60px_-35px_rgba(14,24,48,.5)]">
-      <div className="flex items-center justify-between gap-3 bg-ink px-5 py-4 text-paper">
+    <div className="overflow-hidden rounded-3xl bg-card ring-1 ring-ink/10 shadow-[0_30px_60px_-35px_rgb(var(--shadow-rgb)/.5)]">
+      <div className="flex items-center justify-between gap-3 bg-accent px-5 py-4 text-paper">
         <span className="inline-flex items-center gap-2 font-display text-sm font-semibold">
-          <Sparkles className="size-4 text-accent" /> {t("quiz.badge")}
+          <Sparkles className="size-4 text-flap-amber" /> {t("quiz.badge")}
         </span>
         <div className="flex gap-1.5" aria-label={`الخطوة ${Math.min(step + 1, 3)} من 3`}>
           {questions.map((_, i) => (
-            <span key={i} className={`h-1.5 w-8 rounded-full transition-colors ${i < step ? "bg-accent" : "bg-paper/25"}`} />
+            <span key={i} className={`h-1.5 w-8 rounded-full transition-colors ${i < step ? "bg-paper" : "bg-paper/30"}`} />
           ))}
         </div>
       </div>
@@ -81,10 +81,10 @@ export default function IdeaFinder({ ideas }: { ideas: Idea[] }) {
                     key={oi}
                     type="button"
                     onClick={() => setAnswers((a) => [...a, oi])}
-                    className="group rounded-2xl bg-paper p-4 text-right ring-1 ring-ink/10 transition-all hover:bg-ink hover:text-paper hover:ring-ink"
+                    className="group rounded-2xl bg-slate-soft/60 p-4 text-right ring-1 ring-slate/15 transition-all hover:bg-slate-soft hover:ring-2 hover:ring-slate"
                   >
                     <span className="block font-display font-semibold">{t(`quiz.q${step + 1}.o${oi + 1}`)}</span>
-                    <span className="mt-1 block text-sm text-muted group-hover:text-paper/60">{t(`quiz.q${step + 1}.h${oi + 1}`)}</span>
+                    <span className="mt-1 block text-sm text-ink-soft">{t(`quiz.q${step + 1}.h${oi + 1}`)}</span>
                   </button>
                 ))}
               </div>

@@ -100,7 +100,7 @@ export default function IdeaDetail() {
 
         {/* Purchase card */}
         <aside className="lg:sticky lg:top-28 lg:self-start">
-          <div className="rounded-3xl bg-card p-6 ring-1 ring-ink/10 shadow-[0_30px_60px_-30px_rgba(14,24,48,.5)]">
+          <div className="rounded-3xl bg-card p-6 ring-1 ring-ink/10 shadow-[0_30px_60px_-30px_rgb(var(--shadow-rgb)/.5)]">
             <div className="flex items-center gap-2 text-sm text-muted">
               <FileText className="size-4" /> {t("idea.buyLabel")}
             </div>
