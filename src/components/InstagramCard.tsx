@@ -1,5 +1,6 @@
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import Instagram from "./InstagramIcon";
+import Media from "./Media";
 import type { InstagramPost } from "../types";
 
 /** Instagram post displayed like a product, with a subtle 3D tilt on hover. */
@@ -27,7 +28,7 @@ export default function InstagramCard({ post, index }: { post: InstagramPost; in
     >
       <motion.div style={{ rotateX: rx, rotateY: ry }} className="relative overflow-hidden rounded-3xl bg-ink shadow-[0_30px_60px_-30px_rgb(var(--shadow-rgb)/.6)]">
         <div className="aspect-[4/5]">
-          <img src={post.image} alt={post.title} loading="lazy" className="size-full object-cover transition-transform duration-700 group-hover:scale-105" />
+          <Media src={post.image} alt={post.title} className="size-full object-cover transition-transform duration-700 group-hover:scale-105" />
         </div>
         <span className="absolute top-4 right-4 rounded-full bg-paper px-3 py-1 font-mono text-[11px] font-semibold text-ink">
           #{String(index + 1).padStart(2, "0")}

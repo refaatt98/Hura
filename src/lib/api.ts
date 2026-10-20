@@ -139,15 +139,45 @@ export async function deleteInstagramPost(id: string): Promise<void> {
   if (error) fail(error);
 }
 
-/** Uploads an image to the public "media" bucket and returns its URL. */
-export async function uploadImage(file: File): Promise<string> {
-  if (!file.type.startsWith("image/")) throw new Error("الملف لازم يكون صورة.");
-  if (file.size > 5 * 1024 * 1024) throw new Error("الصورة أكبر من 5MB.");
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error } = await supabase.storage.from("media").upload(path, file, { contentType: file.type, upsert: false });
-  if (error) throw new Error("ما قدرنا نرفع الصورة، جرّب مرة ثانية.");
-  return supabase.storage.from("media").getPublicUrl(path).data.publicUrl;
+/* ───────── file uploads (Cloudflare R2) ─────────
+   1. The "r2-upload" Edge Function returns a short-lived presigned URL
+      (the R2 keys stay on the server, in Supabase Vault).
+   2. The browser PUTs the file straight to R2 and we keep its public URL. */
+
+const MAX_UPLOAD_MB = 500;
+
+/** Uploads an image or video to Cloudflare R2 and returns its public URL. */
+export async function uploadMedia(file: File, onProgress?: (percent: number) => void): Promise<string> {
+  if (!/^(image|video)\//.test(file.type)) throw new Error("الملف لازم يكون صورة أو فيديو.");
+  if (file.size > MAX_UPLOAD_MB * 1024 * 1024) throw new Error(`الملف أكبر من ${MAX_UPLOAD_MB}MB.`);
+
+  const { data, error } = await supabase.functions.invoke<{ uploadUrl: string; publicUrl: string; error?: string }>("r2-upload", {
+    body: { name: file.name, type: file.type, size: file.size },
+  });
+  if (error || !data?.uploadUrl) {
+    let msg = "ما قدرنا نجهّز الرفع، جرّب مرة ثانية.";
+    try {
+      const ctx = (error as { context?: Response } | null)?.context;
+      const j = ctx ? await ctx.json() : null;
+      if (j?.error) msg = j.error;
+    } catch {
+      /* keep default message */
+    }
+    throw new Error(msg);
+  }
+
+  // XMLHttpRequest (not fetch) so we can report upload progress for big videos
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", data.uploadUrl);
+    xhr.setRequestHeader("Content-Type", file.type);
+    xhr.upload.onprogress = (e) => e.lengthComputable && onProgress?.(Math.round((e.loaded / e.total) * 100));
+    xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error("فشل الرفع، جرّب مرة ثانية.")));
+    xhr.onerror = () => reject(new Error("انقطع الاتصال أثناء الرفع."));
+    xhr.send(file);
+  });
+  onProgress?.(100);
+  return data.publicUrl;
 }
 
 /* ───────── ideas ───────── */

@@ -47,7 +47,11 @@ src/
 ## قاعدة البيانات (Supabase)
 - الموقع مربوط بمشروع Supabase اسمه `hura`. كل القراءة والكتابة بتمر من `src/lib/api.ts`.
 - الجداول: `site_settings`, `instagram_posts`, `ideas`, `workshops`, `idea_orders`, `custom_requests`, `workshop_registrations`, `contact_messages`, `admins`.
-- الصور المرفوعة بتنحفظ بـ Storage bucket اسمه `media`.
+- **الملفات المرفوعة (صور وفيديو)** بتنحفظ على **Cloudflare R2** (bucket اسمه `hura`)، مش على Supabase:
+  1. الموقع بيطلب رابط رفع مؤقت من Edge Function اسمها `r2-upload` (الكود بـ `supabase/functions/r2-upload`).
+  2. الملف بينرفع مباشرة على R2، وبينحفظ رابطه العام (`pub-….r2.dev`).
+  - مفاتيح R2 محفوظة بـ **Supabase Vault** (مش بالكود ولا بـ git)، وبس السيرفر بيقدر يقرأها.
+  - الأنواع المسموحة: صور و فيديو (MP4/WEBM/MOV) لحد 500MB.
 - ملفات قاعدة البيانات بـ `supabase/`: الجداول (`migrations/`) والبيانات الأولية (`seed.sql`).
 - حجز الورشة بيمر من دالة `register_for_workshop` بتتأكد من المقاعد وبتحجز بخطوة وحدة.
 - الرابط والمفتاح العام (publishable) موجودين بـ `src/lib/supabase.ts`. هاد آمن لأنهم أصلاً عامّين.

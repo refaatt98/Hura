@@ -6,7 +6,8 @@ import { useSite } from "../SiteProvider";
 import Modal from "../Modal";
 import Skeleton from "../Skeleton";
 import { Field, TextArea } from "../Field";
-import ImageInput from "./ImageInput";
+import MediaInput from "./MediaInput";
+import Media from "../Media";
 
 type Draft = Omit<InstagramPost, "id"> & { id?: string };
 
@@ -29,7 +30,7 @@ export default function InstagramManager() {
     e.preventDefault();
     if (!draft) return;
     if (!draft.image) {
-      setError("ارفع صورة أو حط رابطها.");
+      setError("ارفع صورة أو فيديو، أو حط رابط.");
       return;
     }
     setBusy(true);
@@ -81,7 +82,7 @@ export default function InstagramManager() {
           {posts.map((p, i) => (
             <li key={p.id} className={`overflow-hidden rounded-2xl bg-card ring-1 ${i < 3 ? "ring-accent" : "ring-ink/10"}`}>
               <div className="relative aspect-[4/3] bg-paper-deep">
-                <img src={p.image} alt="" className="size-full object-cover" />
+                <Media src={p.image} className="size-full object-cover" />
                 <span className={`absolute top-2 right-2 rounded-full px-2 py-0.5 text-[11px] font-bold ${i < 3 ? "bg-accent text-paper" : "bg-paper text-muted"}`}>
                   {i < 3 ? `بالرئيسية #${i + 1}` : "مخفي"}
                 </span>
@@ -104,7 +105,7 @@ export default function InstagramManager() {
       <Modal open={draft !== null} onClose={() => setDraft(null)} title={draft?.id ? "تعديل المنشور" : "منشور جديد"}>
         {draft && (
           <form onSubmit={save} className="space-y-4">
-            <ImageInput value={draft.image} onChange={(image) => setDraft({ ...draft, image })} />
+            <MediaInput value={draft.image} onChange={(image) => setDraft({ ...draft, image })} />
             <Field label="العنوان" required value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
             <TextArea label="وصف قصير" value={draft.caption} onChange={(e) => setDraft({ ...draft, caption: e.target.value })} className="[&_textarea]:min-h-16" />
             <Field
