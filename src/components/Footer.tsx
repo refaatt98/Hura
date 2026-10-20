@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { ArrowUpLeft, Mail, MessageCircle } from "lucide-react";
 import Instagram from "./InstagramIcon";
 import Container from "./Container";
+import Logo from "./Logo";
 import { navLinks } from "./navLinks";
 import { Hl, useSite } from "./SiteProvider";
 
@@ -12,6 +13,7 @@ export default function Footer() {
     <footer className="grid-lines relative mt-28 overflow-hidden bg-ink text-paper">
       <Container className="grid gap-12 pt-20 pb-10 md:grid-cols-[1.5fr_1fr_1fr]">
         <div>
+          <div className="mb-8"><Logo light /></div>
           <p className="max-w-sm font-display text-3xl leading-tight font-extrabold sm:text-4xl">
             <Hl text={t("footer.title")} hl={t("footer.titleHl")} />
           </p>
