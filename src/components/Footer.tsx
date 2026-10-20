@@ -61,7 +61,6 @@ export default function Footer() {
       <div className="relative border-t border-paper/10">
         <Container className="flex flex-wrap items-center justify-between gap-2 py-5 text-xs text-paper/45">
           <span>© {year} Hura Business — Hura Projects</span>
-          <Link to="/admin" className="hover:text-paper">لوحة الإدارة</Link>
         </Container>
       </div>
     </footer>

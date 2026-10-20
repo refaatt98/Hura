@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, Navigate, useNavigate, useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import {
   CalendarDays,
   ExternalLink,
   FileText,
   Inbox,
   LayoutDashboard,
-  LogOut,
   Mail,
   Pencil,
   Plus,
@@ -31,9 +30,7 @@ import {
   getIdeas,
   getSubmissions,
   getWorkshops,
-  isSignedIn,
   saveIdea,
-  signOut,
 } from "../lib/api";
 import { formatDate, money } from "../lib/format";
 import type { Idea, RequestStatus, SubmissionKind, Workshop } from "../types";
@@ -54,7 +51,6 @@ const submissionKinds: SubmissionKind[] = ["orders", "custom", "registrations", 
 
 export default function Admin() {
   const [params, setParams] = useSearchParams();
-  const nav = useNavigate();
   const tab = (tabs.find((t) => t.id === params.get("tab"))?.id ?? "overview") as Tab;
   const [newCounts, setNewCounts] = useState<Partial<Record<SubmissionKind, number>>>({});
 
@@ -65,8 +61,6 @@ export default function Admin() {
   }, []);
 
   useEffect(refreshCounts, [refreshCounts, tab]);
-
-  if (!isSignedIn()) return <Navigate to="/admin/login" replace />;
 
   const go = (t: Tab) => setParams(t === "overview" ? {} : { tab: t });
   const current = tabs.find((t) => t.id === tab)!;
@@ -84,16 +78,6 @@ export default function Admin() {
             <Link to="/" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-ink-soft hover:bg-paper-deep">
               <ExternalLink className="size-4" /> <span className="hidden sm:inline">الموقع</span>
             </Link>
-            <button
-              type="button"
-              onClick={async () => {
-                await signOut();
-                nav("/admin/login", { replace: true });
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-ink-soft hover:bg-paper-deep"
-            >
-              <LogOut className="size-4" /> <span className="hidden sm:inline">خروج</span>
-            </button>
           </div>
         </div>
       </header>
@@ -188,7 +172,7 @@ function Overview({ go }: { go: (t: Tab) => void }) {
       <div className="flex gap-3 rounded-2xl bg-flap-amber/20 p-4 text-sm ring-1 ring-flap-amber/50">
         <TriangleAlert className="size-5 shrink-0 text-accent-deep" />
         <p className="leading-relaxed">
-          <b>وضع تجريبي:</b> الطلبات والتعديلات محفوظة بهالمتصفح بس، فما رح تشوف طلبات الزوار من أجهزة ثانية. بعد ربط Supabase بتوصل كل الطلبات لهون من أي جهاز.
+          <b>بدون تسجيل دخول:</b> هالصفحة مفتوحة لأي حدا بيعرف رابطها. لا تشارك الرابط، وفعّل تسجيل الدخول قبل ما الموقع ينتشر.
         </p>
       </div>
 

@@ -15,6 +15,7 @@
   },
   "homepage": "https://github.com/refaatt98/Hura#readme",
   "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
     "lucide-react": "^1.60.0",
     "motion": "^14.4.0",
     "react": "^19.3.1",

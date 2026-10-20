@@ -25,7 +25,7 @@ React + TypeScript · Vite · Tailwind CSS v4 · React Router · motion · lucid
 src/
   pages/        صفحة لكل ملف
   components/   مكوّنات مشتركة
-  data/         بيانات وهمية (لحد ما نربط Supabase)
+  data/         محتوى ثابت (إنستغرام، معلومات الموقع) + نسخة البيانات الأولية
   lib/api.ts    كل جلب للبيانات بيمر من هون
   types.ts      أنواع البيانات
   index.css     الألوان والخطوط (tokens) بمكان واحد
@@ -43,16 +43,19 @@ src/
 | `/custom` | طلب مشروع مخصص (نموذج على خطوات) |
 | `/workshops` · `/workshops/:id` | الورشات وتفاصيل الورشة (تسجيل) |
 | `/contact` | تواصل + أسئلة شائعة |
-| `/admin/login` · `/admin` | لوحة الإدارة |
+| `/admin` | لوحة الإدارة (بدون تسجيل دخول حالياً) |
 
-## لوحة الإدارة (وضع تجريبي)
-- الدخول التجريبي: `admin@hura.ps` / `hura2026`. لتغييره ضيف `VITE_ADMIN_EMAIL` و `VITE_ADMIN_PASSWORD` بـ Netlify.
-- ⚠️ هاد فحص بالمتصفح بس، **مش حماية حقيقية**. الحماية الحقيقية بتيجي مع Supabase Auth.
-- الطلبات والتعديلات محفوظة بـ localStorage، يعني بتظهر بس على نفس الجهاز اللي انعملت منه لحد ما نربط Supabase.
+## قاعدة البيانات (Supabase)
+- الموقع مربوط بمشروع Supabase اسمه `hura`. كل القراءة والكتابة بتمر من `src/lib/api.ts`.
+- الجداول: `ideas`, `workshops`, `idea_orders`, `custom_requests`, `workshop_registrations`, `contact_messages`, `admins`.
+- ملفات قاعدة البيانات بـ `supabase/`: الجداول (`migrations/`) والبيانات الأولية (`seed.sql`).
+- حجز الورشة بيمر من دالة `register_for_workshop` بتتأكد من المقاعد وبتحجز بخطوة وحدة.
+- الرابط والمفتاح العام (publishable) موجودين بـ `src/lib/supabase.ts`. هاد آمن لأنهم أصلاً عامّين.
+  **لا تحط أبداً service_role key أو توكن `sbp_...` بالكود.**
 
-## Supabase (لاحقاً)
-كل الدوال بـ `src/lib/api.ts` بترجع `Promise`، فبس بنغيّر هالملف. المتغيرات المطلوبة موجودة بـ `.env.example`
-(`VITE_SUPABASE_URL` و `VITE_SUPABASE_ANON_KEY`). **لا تحط أبداً Personal Access Token (`sbp_...`) أو `service_role` key بالفرونت إند.**
+## لوحة الإدارة (`/admin`)
+⚠️ **حالياً بدون تسجيل دخول، بطلب صاحب المشروع.** أي حدا بيعرف الرابط بيقدر يشوف الطلبات (أسماء وأرقام) ويعدّل ويحذف.
+لإرجاع الحماية: شغّل `supabase/restore_admin_protection.sql` وارجع شاشة تسجيل الدخول (Supabase Auth). الإيميلات المسموحة بجدول `admins`.
 
 ## النشر على Netlify
 الإعدادات جاهزة بـ `netlify.toml` (أمر البناء، مجلد `dist`، وتوجيه كل الروابط لـ `index.html` عشان React Router).

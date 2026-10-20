@@ -1,20 +1,17 @@
 /**
- * Single data-access layer for the whole app.
+ * Single data-access layer for the whole app — everything goes through Supabase.
+ * Pages and components only call these functions; they never talk to Supabase directly.
  *
- * MOCK MODE: seed data comes from src/data, and anything created or edited
- * (orders, registrations, messages, admin edits) is saved in the browser's
- * localStorage. That means it only lives on the device it was made on.
- *
- * When Supabase is connected, only this file needs to change — every
- * function keeps the same name and returns the same Promise type.
+ * Database columns are snake_case; the app's types (src/types.ts) are camelCase.
+ * The `to*` / `from*` helpers below translate between the two.
  */
-import { ideas as seedIdeas } from "../data/ideas";
-import { workshops as seedWorkshops } from "../data/workshops";
+import { supabase } from "./supabase";
 import { instagramPosts } from "../data/instagram";
 import { site } from "../data/site";
 import type {
   ContactMessage,
   CustomRequest,
+  Difficulty,
   Idea,
   IdeaOrder,
   InstagramPost,
@@ -26,147 +23,223 @@ import type {
   SiteInfo,
   SubmissionKind,
   Workshop,
+  WorkshopMode,
   WorkshopRegistration,
 } from "../types";
 
 /* ───────── helpers ───────── */
 
-/** Simulates network latency so loading states are exercised. */
-const delay = <T,>(value: T, ms = 250): Promise<T> =>
-  new Promise((resolve) => setTimeout(() => resolve(structuredClone(value)), ms));
+type Row = Record<string, unknown>;
 
-function readStore<T>(key: string): T[] | null {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T[]) : null;
-  } catch {
-    return null;
-  }
+/** Turns a Supabase error into a readable Arabic message. */
+function fail(error: { message: string; code?: string } | null): never {
+  const msg = error?.message ?? "";
+  // errors raised by our SQL functions are already in Arabic
+  if (/[؀-ۿ]/.test(msg)) throw new Error(msg);
+  throw new Error("صار خطأ بالاتصال، جرّب مرة ثانية.");
 }
 
-function writeStore<T>(key: string, items: T[]) {
-  try {
-    localStorage.setItem(key, JSON.stringify(items));
-  } catch {
-    /* storage unavailable — ignore in mock mode */
-  }
+/** Empty strings become null in the database. */
+const clean = (s?: string) => (s && s.trim() ? s.trim() : null);
+
+/* ───────── site content (static for now) ───────── */
+
+export async function getSiteInfo(): Promise<SiteInfo> {
+  return site;
 }
 
-const newId = () =>
-  typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
-
-const KEYS = {
-  ideas: "hura.ideas",
-  workshops: "hura.workshops",
-  orders: "hura.orders",
-  custom: "hura.custom",
-  registrations: "hura.registrations",
-  messages: "hura.messages",
-  session: "hura.session",
-} as const;
-
-const allIdeas = () => readStore<Idea>(KEYS.ideas) ?? seedIdeas;
-const allWorkshops = () => readStore<Workshop>(KEYS.workshops) ?? seedWorkshops;
-
-/* ───────── site content ───────── */
-
-export function getSiteInfo(): Promise<SiteInfo> {
-  return delay(site, 0);
-}
-
-export function getInstagramPosts(): Promise<InstagramPost[]> {
-  return delay(instagramPosts);
+export async function getInstagramPosts(): Promise<InstagramPost[]> {
+  return instagramPosts;
 }
 
 /* ───────── ideas ───────── */
 
-export function getIdeas(): Promise<Idea[]> {
-  return delay(allIdeas());
+const toIdea = (r: Row): Idea => ({
+  id: r.id as string,
+  code: r.code as string,
+  title: r.title as string,
+  category: r.category as string,
+  summary: r.summary as string,
+  description: r.description as string,
+  price: r.price as number,
+  capitalMin: r.capital_min as number,
+  capitalMax: r.capital_max as number,
+  paybackMonths: r.payback_months as number,
+  marginPercent: r.margin_percent as number,
+  difficulty: r.difficulty as Difficulty,
+  includes: (r.includes as string[]) ?? [],
+  featured: r.featured as boolean,
+});
+
+const fromIdea = (i: Idea) => ({
+  id: i.id,
+  code: i.code,
+  title: i.title,
+  category: i.category,
+  summary: i.summary,
+  description: i.description,
+  price: i.price,
+  capital_min: i.capitalMin,
+  capital_max: i.capitalMax,
+  payback_months: i.paybackMonths,
+  margin_percent: i.marginPercent,
+  difficulty: i.difficulty,
+  includes: i.includes,
+  featured: i.featured,
+});
+
+export async function getIdeas(): Promise<Idea[]> {
+  const { data, error } = await supabase.from("ideas").select("*").order("featured", { ascending: false }).order("created_at");
+  if (error) fail(error);
+  return data.map(toIdea);
 }
 
-export function getFeaturedIdeas(): Promise<Idea[]> {
-  return delay(allIdeas().filter((i) => i.featured));
+export async function getFeaturedIdeas(): Promise<Idea[]> {
+  const { data, error } = await supabase.from("ideas").select("*").eq("featured", true).order("created_at");
+  if (error) fail(error);
+  return data.map(toIdea);
 }
 
-export function getIdea(id: string): Promise<Idea | undefined> {
-  return delay(allIdeas().find((i) => i.id === id));
+export async function getIdea(id: string): Promise<Idea | undefined> {
+  const { data, error } = await supabase.from("ideas").select("*").eq("id", id).maybeSingle();
+  if (error) fail(error);
+  return data ? toIdea(data) : undefined;
 }
 
-/** Create or update an idea (admin). */
-export function saveIdea(idea: Idea): Promise<Idea> {
-  const list = allIdeas();
-  const idx = list.findIndex((i) => i.id === idea.id);
-  const next = idx >= 0 ? list.map((i) => (i.id === idea.id ? idea : i)) : [idea, ...list];
-  writeStore(KEYS.ideas, next);
-  return delay(idea);
+/** Create or update an idea (admin only — enforced by the database). */
+export async function saveIdea(idea: Idea): Promise<Idea> {
+  const { data, error } = await supabase.from("ideas").upsert(fromIdea(idea)).select().single();
+  if (error) fail(error);
+  return toIdea(data);
 }
 
-export function deleteIdea(id: string): Promise<void> {
-  writeStore(KEYS.ideas, allIdeas().filter((i) => i.id !== id));
-  return delay(undefined);
+export async function deleteIdea(id: string): Promise<void> {
+  const { error } = await supabase.from("ideas").delete().eq("id", id);
+  if (error) fail(error);
 }
 
 /* ───────── workshops ───────── */
 
-const byDate = (a: Workshop, b: Workshop) => a.date.localeCompare(b.date);
+/** Postgres `timestamp` comes back as "2026-11-14T10:00:00" (local event time). */
+const toWorkshop = (r: Row): Workshop => ({
+  id: r.id as string,
+  title: r.title as string,
+  summary: r.summary as string,
+  description: r.description as string,
+  date: String(r.date).slice(0, 19),
+  durationHours: r.duration_hours as number,
+  mode: r.mode as WorkshopMode,
+  location: r.location as string,
+  price: r.price as number,
+  seats: r.seats as number,
+  seatsTaken: r.seats_taken as number,
+  trainer: r.trainer as string,
+  agenda: (r.agenda as string[]) ?? [],
+});
 
-export function getWorkshops(): Promise<Workshop[]> {
-  return delay([...allWorkshops()].sort(byDate));
+const fromWorkshop = (w: Workshop) => ({
+  id: w.id,
+  title: w.title,
+  summary: w.summary,
+  description: w.description,
+  date: w.date,
+  duration_hours: w.durationHours,
+  mode: w.mode,
+  location: w.location,
+  price: w.price,
+  seats: w.seats,
+  seats_taken: w.seatsTaken,
+  trainer: w.trainer,
+  agenda: w.agenda,
+});
+
+/** Current local time in the same format as workshop dates. */
+const nowLocal = () => {
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
+};
+
+export async function getWorkshops(): Promise<Workshop[]> {
+  const { data, error } = await supabase.from("workshops").select("*").order("date");
+  if (error) fail(error);
+  return data.map(toWorkshop);
 }
 
-export function getUpcomingWorkshops(limit = 3): Promise<Workshop[]> {
-  const now = new Date().toISOString();
-  return delay([...allWorkshops()].filter((w) => w.date >= now).sort(byDate).slice(0, limit));
+export async function getUpcomingWorkshops(limit = 3): Promise<Workshop[]> {
+  const { data, error } = await supabase.from("workshops").select("*").gte("date", nowLocal()).order("date").limit(limit);
+  if (error) fail(error);
+  return data.map(toWorkshop);
 }
 
-export function getWorkshop(id: string): Promise<Workshop | undefined> {
-  return delay(allWorkshops().find((w) => w.id === id));
+export async function getWorkshop(id: string): Promise<Workshop | undefined> {
+  const { data, error } = await supabase.from("workshops").select("*").eq("id", id).maybeSingle();
+  if (error) fail(error);
+  return data ? toWorkshop(data) : undefined;
 }
 
-/** Create or update a workshop (admin). */
-export function saveWorkshop(workshop: Workshop): Promise<Workshop> {
-  const list = allWorkshops();
-  const idx = list.findIndex((w) => w.id === workshop.id);
-  const next = idx >= 0 ? list.map((w) => (w.id === workshop.id ? workshop : w)) : [workshop, ...list];
-  writeStore(KEYS.workshops, next);
-  return delay(workshop);
+/** Create or update a workshop (admin only). */
+export async function saveWorkshop(workshop: Workshop): Promise<Workshop> {
+  const { data, error } = await supabase.from("workshops").upsert(fromWorkshop(workshop)).select().single();
+  if (error) fail(error);
+  return toWorkshop(data);
 }
 
-export function deleteWorkshop(id: string): Promise<void> {
-  writeStore(KEYS.workshops, allWorkshops().filter((w) => w.id !== id));
-  return delay(undefined);
+export async function deleteWorkshop(id: string): Promise<void> {
+  const { error } = await supabase.from("workshops").delete().eq("id", id);
+  if (error) fail(error);
 }
 
-/* ───────── public submissions ───────── */
+/* ───────── public submissions ─────────
+   Visitors can insert but not read back (RLS), so we don't `.select()` after insert. */
 
-function addSubmission<T>(key: string, item: T): Promise<T> {
-  writeStore(key, [item, ...(readStore<T>(key) ?? [])]);
-  return delay(item, 600);
+export async function createIdeaOrder(input: NewIdeaOrder): Promise<void> {
+  const { error } = await supabase.from("idea_orders").insert({
+    idea_id: input.ideaId,
+    idea_title: input.ideaTitle,
+    name: input.name.trim(),
+    phone: input.phone.trim(),
+    email: clean(input.email),
+    notes: clean(input.notes),
+  });
+  if (error) fail(error);
 }
 
-const stamp = () => ({ id: newId(), createdAt: new Date().toISOString(), status: "جديد" as RequestStatus });
-
-export function createIdeaOrder(input: NewIdeaOrder): Promise<IdeaOrder> {
-  return addSubmission<IdeaOrder>(KEYS.orders, { ...input, ...stamp() });
+export async function createCustomRequest(input: NewCustomRequest): Promise<void> {
+  const { error } = await supabase.from("custom_requests").insert({
+    field: input.field,
+    idea: clean(input.idea),
+    budget: input.budget,
+    city: input.city.trim(),
+    timeline: input.timeline,
+    name: input.name.trim(),
+    phone: input.phone.trim(),
+    email: clean(input.email),
+    contact_via: input.contactVia,
+  });
+  if (error) fail(error);
 }
 
-export function createCustomRequest(input: NewCustomRequest): Promise<CustomRequest> {
-  return addSubmission<CustomRequest>(KEYS.custom, { ...input, ...stamp() });
+/** Books seats atomically in the database (checks availability). */
+export async function createWorkshopRegistration(input: NewWorkshopRegistration): Promise<void> {
+  const { error } = await supabase.rpc("register_for_workshop", {
+    p_workshop_id: input.workshopId,
+    p_name: input.name,
+    p_phone: input.phone,
+    p_email: input.email ?? null,
+    p_notes: input.notes ?? null,
+    p_seats: input.seats,
+  });
+  if (error) fail(error);
 }
 
-export async function createWorkshopRegistration(input: NewWorkshopRegistration): Promise<WorkshopRegistration> {
-  const w = allWorkshops().find((x) => x.id === input.workshopId);
-  if (!w) throw new Error("الورشة غير موجودة");
-  if (w.seats - w.seatsTaken < input.seats) throw new Error("ما في مقاعد كافية");
-  writeStore(
-    KEYS.workshops,
-    allWorkshops().map((x) => (x.id === w.id ? { ...x, seatsTaken: x.seatsTaken + input.seats } : x)),
-  );
-  return addSubmission<WorkshopRegistration>(KEYS.registrations, { ...input, ...stamp() });
-}
-
-export function createContactMessage(input: NewContactMessage): Promise<ContactMessage> {
-  return addSubmission<ContactMessage>(KEYS.messages, { ...input, ...stamp() });
+export async function createContactMessage(input: NewContactMessage): Promise<void> {
+  const { error } = await supabase.from("contact_messages").insert({
+    name: input.name.trim(),
+    contact: input.contact.trim(),
+    subject: input.subject,
+    message: input.message.trim(),
+  });
+  if (error) fail(error);
 }
 
 /* ───────── admin: submissions ───────── */
@@ -178,58 +251,73 @@ export interface SubmissionMap {
   messages: ContactMessage;
 }
 
-export function getSubmissions<K extends SubmissionKind>(kind: K): Promise<SubmissionMap[K][]> {
-  return delay(readStore<SubmissionMap[K]>(KEYS[kind]) ?? []);
+const tables: Record<SubmissionKind, string> = {
+  orders: "idea_orders",
+  custom: "custom_requests",
+  registrations: "workshop_registrations",
+  messages: "contact_messages",
+};
+
+const base = (r: Row) => ({
+  id: r.id as string,
+  createdAt: r.created_at as string,
+  status: r.status as RequestStatus,
+});
+const opt = (v: unknown) => (v == null ? undefined : (v as string));
+
+const mappers: { [K in SubmissionKind]: (r: Row) => SubmissionMap[K] } = {
+  orders: (r) => ({
+    ...base(r),
+    ideaId: (r.idea_id as string) ?? "",
+    ideaTitle: r.idea_title as string,
+    name: r.name as string,
+    phone: r.phone as string,
+    email: opt(r.email),
+    notes: opt(r.notes),
+  }),
+  custom: (r) => ({
+    ...base(r),
+    field: r.field as string,
+    idea: (r.idea as string) ?? "",
+    budget: r.budget as string,
+    city: r.city as string,
+    timeline: r.timeline as string,
+    name: r.name as string,
+    phone: r.phone as string,
+    email: opt(r.email),
+    contactVia: r.contact_via as string,
+  }),
+  registrations: (r) => ({
+    ...base(r),
+    workshopId: (r.workshop_id as string) ?? "",
+    workshopTitle: r.workshop_title as string,
+    name: r.name as string,
+    phone: r.phone as string,
+    email: opt(r.email),
+    seats: r.seats as number,
+    notes: opt(r.notes),
+  }),
+  messages: (r) => ({
+    ...base(r),
+    name: r.name as string,
+    contact: r.contact as string,
+    subject: r.subject as string,
+    message: r.message as string,
+  }),
+};
+
+export async function getSubmissions<K extends SubmissionKind>(kind: K): Promise<SubmissionMap[K][]> {
+  const { data, error } = await supabase.from(tables[kind]).select("*").order("created_at", { ascending: false });
+  if (error) fail(error);
+  return (data as Row[]).map(mappers[kind]);
 }
 
-export function getIdeaOrders(): Promise<IdeaOrder[]> {
-  return getSubmissions("orders");
+export async function updateSubmissionStatus(kind: SubmissionKind, id: string, status: RequestStatus): Promise<void> {
+  const { error } = await supabase.from(tables[kind]).update({ status }).eq("id", id);
+  if (error) fail(error);
 }
 
-export function updateSubmissionStatus(kind: SubmissionKind, id: string, status: RequestStatus): Promise<void> {
-  const list = readStore<{ id: string; status: RequestStatus }>(KEYS[kind]) ?? [];
-  writeStore(KEYS[kind], list.map((x) => (x.id === id ? { ...x, status } : x)));
-  return delay(undefined, 100);
-}
-
-export function deleteSubmission(kind: SubmissionKind, id: string): Promise<void> {
-  const list = readStore<{ id: string }>(KEYS[kind]) ?? [];
-  writeStore(KEYS[kind], list.filter((x) => x.id !== id));
-  return delay(undefined, 100);
-}
-
-/* ───────── admin: auth (mock) ───────── */
-// ⚠️ Front-end only check — NOT real security. Replace with Supabase Auth.
-// Set VITE_ADMIN_EMAIL / VITE_ADMIN_PASSWORD in Netlify to change the demo login.
-
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "admin@hura.ps";
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "hura2026";
-
-export function signIn(email: string, password: string): Promise<boolean> {
-  const ok = email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD;
-  if (ok) {
-    try {
-      localStorage.setItem(KEYS.session, JSON.stringify({ email: ADMIN_EMAIL, at: Date.now() }));
-    } catch {
-      /* ignore */
-    }
-  }
-  return delay(ok, 500);
-}
-
-export function signOut(): Promise<void> {
-  try {
-    localStorage.removeItem(KEYS.session);
-  } catch {
-    /* ignore */
-  }
-  return delay(undefined, 0);
-}
-
-export function isSignedIn(): boolean {
-  try {
-    return Boolean(localStorage.getItem(KEYS.session));
-  } catch {
-    return false;
-  }
+export async function deleteSubmission(kind: SubmissionKind, id: string): Promise<void> {
+  const { error } = await supabase.from(tables[kind]).delete().eq("id", id);
+  if (error) fail(error);
 }

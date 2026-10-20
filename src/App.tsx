@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Route, Routes } from "react-router";
+import { Navigate, Route, Routes } from "react-router";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Ideas from "./pages/Ideas";
@@ -12,7 +12,6 @@ import NotFound from "./pages/NotFound";
 
 // Admin code is only downloaded when someone opens /admin
 const Admin = lazy(() => import("./pages/Admin"));
-const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const adminFallback = <div className="grid min-h-dvh place-items-center text-muted">…</div>;
 
 export default function App() {
@@ -30,7 +29,7 @@ export default function App() {
       </Route>
       {/* admin has its own layout (no public header/footer) */}
       <Route path="admin" element={<Suspense fallback={adminFallback}><Admin /></Suspense>} />
-      <Route path="admin/login" element={<Suspense fallback={adminFallback}><AdminLogin /></Suspense>} />
+      <Route path="admin/login" element={<Navigate to="/admin" replace />} />
     </Routes>
   );
 }
