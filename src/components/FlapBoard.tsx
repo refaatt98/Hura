@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import type { Idea } from "../types";
 import { Flap, FlapDigits } from "./Flap";
+import { useSite } from "./SiteProvider";
 
 const ROWS = 4;
 const k = (n: number) => String(Math.round(n / 1000)).padStart(3, " ");
 
 /** Departures-style board that keeps rotating through the ideas. */
 export default function FlapBoard({ ideas }: { ideas: Idea[] }) {
+  const { t } = useSite();
   const [slots, setSlots] = useState<number[]>(() => ideas.slice(0, ROWS).map((_, i) => i));
   const [next, setNext] = useState(ROWS % Math.max(ideas.length, 1));
   const [row, setRow] = useState(0);
@@ -25,19 +27,19 @@ export default function FlapBoard({ ideas }: { ideas: Idea[] }) {
   return (
     <div className="rounded-2xl border border-paper/10 bg-ink-2 p-3 shadow-[0_30px_80px_-20px_rgba(0,0,0,.6)] sm:p-4">
       <div className="mb-3 flex items-center justify-between px-1">
-        <span className="font-display text-sm font-bold text-paper">لوحة الفرص</span>
+        <span className="font-display text-sm font-bold text-paper">{t("hero.boardTitle")}</span>
         <span className="inline-flex items-center gap-2 text-xs text-flap-amber">
           <span className="size-2 animate-pulse rounded-full bg-flap-amber" />
-          مباشر
+          {t("board.live")}
         </span>
       </div>
 
       <div className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-x-2 gap-y-2 text-[13px] sm:grid-cols-[auto_1fr_auto_auto_auto] sm:text-sm">
-        <span className="px-1 text-[11px] text-paper/45">الرمز</span>
-        <span className="px-1 text-[11px] text-paper/45">الفرصة</span>
-        <span className="px-1 text-[11px] text-paper/45">رأس المال k₪</span>
-        <span className="px-1 text-[11px] text-paper/45">استرداد</span>
-        <span className="hidden px-1 text-[11px] text-paper/45 sm:block">هامش</span>
+        <span className="px-1 text-[11px] text-paper/45">{t("board.code")}</span>
+        <span className="px-1 text-[11px] text-paper/45">{t("board.idea")}</span>
+        <span className="px-1 text-[11px] text-paper/45">{t("board.capital")}</span>
+        <span className="px-1 text-[11px] text-paper/45">{t("board.payback")}</span>
+        <span className="hidden px-1 text-[11px] text-paper/45 sm:block">{t("board.margin")}</span>
 
         {slots.map((idx) => {
           const idea = ideas[idx];

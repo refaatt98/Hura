@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Hl, useSite } from "../components/SiteProvider";
 import { AnimatePresence, motion } from "motion/react";
 import { Columns3, Search, SlidersHorizontal, X } from "lucide-react";
 import Container from "../components/Container";
@@ -13,17 +14,18 @@ import { getIdeas } from "../lib/api";
 import type { Difficulty } from "../types";
 
 const budgets = [
-  { id: "all", label: "كل الميزانيات", test: () => true },
-  { id: "s", label: "أقل من 10k ₪", test: (min: number) => min < 10000 },
-  { id: "m", label: "10k–35k ₪", test: (min: number) => min >= 10000 && min <= 35000 },
-  { id: "l", label: "أكثر من 35k ₪", test: (min: number) => min > 35000 },
+  { id: "all", label: "ideas.budgetAll", test: () => true },
+  { id: "s", label: "ideas.budget1", test: (min: number) => min < 10000 },
+  { id: "m", label: "ideas.budget2", test: (min: number) => min >= 10000 && min <= 35000 },
+  { id: "l", label: "ideas.budget3", test: (min: number) => min > 35000 },
 ] as const;
 
+/** Sort options; labels are editable texts. */
 const sorts = {
-  featured: "المميزة أولاً",
-  capital: "الأقل رأس مال",
-  payback: "الأسرع استرداداً",
-  margin: "الأعلى هامشاً",
+  featured: "ideas.sortFeatured",
+  capital: "ideas.sortCapital",
+  payback: "ideas.sortPayback",
+  margin: "ideas.sortMargin",
 } as const;
 
 const difficulties: Difficulty[] = ["سهل", "متوسط", "متقدم"];
@@ -35,6 +37,7 @@ const chip = (active: boolean) =>
   }`;
 
 export default function Ideas() {
+  const { t } = useSite();
   const { data: ideas, loading } = useAsync(getIdeas);
   const [q, setQ] = useState("");
   const [category, setCategory] = useState("all");
@@ -77,8 +80,8 @@ export default function Ideas() {
 
   return (
     <>
-      <PageHeader eyebrow="أرشيف ملفات الفرص" title="أفكار مشاريع جاهزة للتنفيذ">
-        كل فكرة ملف كامل: رأس المال، مدة الاسترداد، الموردين، وخطة الإطلاق. قارن بين لحد 3 أفكار قبل ما تقرر.
+      <PageHeader eyebrow={t("ideas.eyebrow")} title={<Hl text={t("ideas.title")} hl={t("ideas.titleHl")} />}>
+        {t("ideas.intro")}
       </PageHeader>
 
       <Container className="py-10">
@@ -90,7 +93,7 @@ export default function Ideas() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="ابحث عن فكرة: قهوة، متجر، أطفال…"
+              placeholder={t("ideas.search")}
               className="w-full rounded-full bg-card py-3.5 pr-11 pl-4 ring-1 ring-ink/15 focus:ring-2 focus:ring-ink focus:outline-none"
             />
           </label>
@@ -101,7 +104,7 @@ export default function Ideas() {
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-card px-4 py-3 text-sm font-semibold ring-1 ring-ink/15 lg:hidden"
               aria-expanded={filtersOpen}
             >
-              <SlidersHorizontal className="size-4" /> فلاتر
+              <SlidersHorizontal className="size-4" /> {t("ideas.filters")}
               {activeFilters > 0 && <span className="grid size-5 place-items-center rounded-full bg-accent text-xs text-paper">{activeFilters}</span>}
             </button>
             <label className="flex-1 sm:flex-none">
@@ -112,7 +115,7 @@ export default function Ideas() {
                 className="h-full w-full rounded-full bg-card px-4 py-3 text-sm font-semibold ring-1 ring-ink/15 focus:outline-none"
               >
                 {Object.entries(sorts).map(([k, v]) => (
-                  <option key={k} value={k}>{v}</option>
+                  <option key={k} value={k}>{t(v)}</option>
                 ))}
               </select>
             </label>
@@ -121,19 +124,19 @@ export default function Ideas() {
 
         {/* Filters */}
         <div className={`${filtersOpen ? "block" : "hidden"} mt-5 space-y-4 rounded-xl border-2 border-dashed border-line p-4 lg:block lg:border-0 lg:p-0`}>
-          <FilterRow label="المجال">
-            <button type="button" className={chip(category === "all")} onClick={() => setCategory("all")}>الكل</button>
+          <FilterRow label={t("ideas.filterField")}>
+            <button type="button" className={chip(category === "all")} onClick={() => setCategory("all")}>{t("ideas.all")}</button>
             {categories.map((c) => (
               <button type="button" key={c} className={chip(category === c)} onClick={() => setCategory(c)}>{c}</button>
             ))}
           </FilterRow>
-          <FilterRow label="الميزانية">
+          <FilterRow label={t("ideas.filterBudget")}>
             {budgets.map((b) => (
-              <button type="button" key={b.id} className={chip(budget === b.id)} onClick={() => setBudget(b.id)}>{b.label}</button>
+              <button type="button" key={b.id} className={chip(budget === b.id)} onClick={() => setBudget(b.id)}>{t(b.label)}</button>
             ))}
           </FilterRow>
-          <FilterRow label="الصعوبة">
-            <button type="button" className={chip(difficulty === "all")} onClick={() => setDifficulty("all")}>الكل</button>
+          <FilterRow label={t("ideas.filterDifficulty")}>
+            <button type="button" className={chip(difficulty === "all")} onClick={() => setDifficulty("all")}>{t("ideas.all")}</button>
             {difficulties.map((d) => (
               <button type="button" key={d} className={chip(difficulty === d)} onClick={() => setDifficulty(d)}>{d}</button>
             ))}
@@ -142,11 +145,11 @@ export default function Ideas() {
 
         <div className="mt-8 mb-8 flex items-center justify-between border-b border-ink/15 pb-3 text-sm">
           <span className="font-medium">
-            {loading ? "…" : <><span className="font-mono">{list.length}</span> ملف</>}
+            {loading ? "…" : <><span className="font-mono">{list.length}</span> {t("ideas.count")}</>}
           </span>
           {(activeFilters > 0 || q) && (
             <button type="button" onClick={reset} className="inline-flex items-center gap-1 text-muted hover:text-accent">
-              <X className="size-4" /> مسح الفلاتر
+              <X className="size-4" /> {t("ideas.clear")}
             </button>
           )}
         </div>
@@ -157,11 +160,11 @@ export default function Ideas() {
           </div>
         ) : list.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-line px-6 py-16 text-center">
-            <p className="font-display text-xl font-semibold">ما لقينا ملف بهالمواصفات</p>
-            <p className="mt-2 text-ink-soft">جرّب تغيّر الفلاتر، أو اطلب فكرة مخصصة على مقاسك.</p>
+            <p className="font-display text-xl font-semibold">{t("ideas.emptyTitle")}</p>
+            <p className="mt-2 text-ink-soft">{t("ideas.emptyText")}</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <button type="button" onClick={reset} className="rounded-lg border-2 border-ink px-5 py-3 text-sm font-semibold hover:bg-ink hover:text-paper">مسح الفلاتر</button>
-              <ButtonLink to="/custom">اطلب مشروع مخصص</ButtonLink>
+              <button type="button" onClick={reset} className="rounded-lg border-2 border-ink px-5 py-3 text-sm font-semibold hover:bg-ink hover:text-paper">{t("ideas.clear")}</button>
+              <ButtonLink to="/custom">{t("ideas.emptyCustom")}</ButtonLink>
             </div>
           </div>
         ) : (
@@ -222,14 +225,14 @@ export default function Ideas() {
                 className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-accent-deep disabled:bg-paper/20 disabled:text-paper/50"
               >
                 <Columns3 className="size-4" />
-                {compareIds.length < 2 ? "اختر فكرة كمان" : "قارن الآن"}
+                {compareIds.length < 2 ? t("ideas.compareMore") : t("ideas.compareNow")}
               </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <Modal open={compareOpen} onClose={() => setCompareOpen(false)} title="مقارنة ملفات الفرص" wide>
+      <Modal open={compareOpen} onClose={() => setCompareOpen(false)} title={t("ideas.compareTitle")} wide>
         <CompareTable ideas={compared} />
       </Modal>
     </>

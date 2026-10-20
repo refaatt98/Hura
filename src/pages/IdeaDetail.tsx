@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSite } from "../components/SiteProvider";
 import { Link, useParams } from "react-router";
 import { ArrowRight, Check, FileText, MessageCircle, ShoppingBag } from "lucide-react";
 import Container from "../components/Container";
@@ -16,6 +17,7 @@ import { getIdea, getIdeas } from "../lib/api";
 import { money, moneyRange, monthsLabel } from "../lib/format";
 
 export default function IdeaDetail() {
+  const { t } = useSite();
   const { id = "" } = useParams();
   const { data: idea, loading } = useAsync(() => getIdea(id), [id]);
   const { data: all } = useAsync(getIdeas);
@@ -36,10 +38,10 @@ export default function IdeaDetail() {
   const others = related.length ? related : (all ?? []).filter((i) => i.id !== idea.id).slice(0, 3);
 
   const metrics: { label: string; value?: string; ltr?: boolean; signal?: boolean; node?: React.ReactNode }[] = [
-    { label: "رأس المال", value: moneyRange(idea.capitalMin, idea.capitalMax), ltr: true },
-    { label: "الاسترداد", value: monthsLabel(idea.paybackMonths) },
-    { label: "هامش الربح", value: `▲ ${idea.marginPercent}%`, signal: true },
-    { label: "الصعوبة", node: <DifficultyMeter value={idea.difficulty} /> },
+    { label: t("idea.mCapital"), value: moneyRange(idea.capitalMin, idea.capitalMax), ltr: true },
+    { label: t("idea.mPayback"), value: monthsLabel(idea.paybackMonths) },
+    { label: t("idea.mMargin"), value: `▲ ${idea.marginPercent}%`, signal: true },
+    { label: t("idea.mDifficulty"), node: <DifficultyMeter value={idea.difficulty} /> },
   ];
 
   return (
@@ -48,7 +50,7 @@ export default function IdeaDetail() {
         <div className="pointer-events-none absolute -top-40 -left-40 size-[28rem] rounded-full bg-accent/25 blur-[120px]" />
         <Container className="relative pt-28 pb-12 sm:pt-36 sm:pb-16">
           <Link to="/ideas" className="mb-8 inline-flex items-center gap-1.5 text-sm text-paper/50 hover:text-paper">
-            <ArrowRight className="size-4" /> كل الفرص
+            <ArrowRight className="size-4" /> {t("idea.back")}
           </Link>
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-md bg-flap px-2 py-1 font-mono text-xs font-semibold text-flap-amber">{idea.code}</span>
@@ -73,12 +75,12 @@ export default function IdeaDetail() {
       <Container className="grid gap-10 py-12 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-10">
           <Reveal>
-            <h2 className="mb-3 text-2xl font-bold">عن الفكرة</h2>
+            <h2 className="mb-3 text-2xl font-bold">{t("idea.aboutTitle")}</h2>
             <p className="text-lg leading-loose text-ink-soft">{idea.description}</p>
           </Reveal>
 
           <Reveal>
-            <h2 className="mb-4 text-2xl font-bold">شو بيشمل الملف؟</h2>
+            <h2 className="mb-4 text-2xl font-bold">{t("idea.includesTitle")}</h2>
             <ul className="grid gap-3 sm:grid-cols-2">
               {idea.includes.map((item) => (
                 <li key={item} className="flex items-start gap-3 rounded-2xl bg-card p-4 ring-1 ring-ink/10">
@@ -100,22 +102,22 @@ export default function IdeaDetail() {
         <aside className="lg:sticky lg:top-28 lg:self-start">
           <div className="rounded-3xl bg-card p-6 ring-1 ring-ink/10 shadow-[0_30px_60px_-30px_rgba(14,24,48,.5)]">
             <div className="flex items-center gap-2 text-sm text-muted">
-              <FileText className="size-4" /> الملف الكامل
+              <FileText className="size-4" /> {t("idea.buyLabel")}
             </div>
             <p className="mt-2 font-display text-4xl font-bold">{money(idea.price)}</p>
-            <p className="mt-1 text-sm text-muted">دفعة وحدة · ملف PDF + جلسة أسئلة قصيرة</p>
+            <p className="mt-1 text-sm text-muted">{t("idea.buyNote")}</p>
             <button
               type="button"
               onClick={() => setOrderOpen(true)}
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-accent py-4 font-display font-bold text-paper transition-all hover:bg-accent-deep active:scale-[0.98]"
             >
-              <ShoppingBag className="size-4" /> اطلب الملف
+              <ShoppingBag className="size-4" /> {t("idea.buyButton")}
             </button>
             <ButtonLink to="/custom" variant="ghost" className="mt-3 w-full">
-              بدي نسخة مخصصة إلي
+              {t("idea.customButton")}
             </ButtonLink>
             <Link to="/contact" className="mt-5 flex items-center justify-center gap-1.5 text-sm text-muted hover:text-ink">
-              <MessageCircle className="size-4" /> عندك سؤال قبل الشراء؟
+              <MessageCircle className="size-4" /> {t("idea.question")}
             </Link>
           </div>
         </aside>
@@ -123,7 +125,7 @@ export default function IdeaDetail() {
 
       {others.length > 0 && (
         <Container className="pb-4">
-          <h2 className="mb-8 text-4xl font-black">فرص قريبة</h2>
+          <h2 className="mb-8 text-4xl font-black">{t("idea.relatedTitle")}</h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {others.map((i) => (
               <IdeaCard key={i.id} idea={i} />
@@ -140,13 +142,13 @@ export default function IdeaDetail() {
             <p className="font-display text-xl font-bold">{money(idea.price)}</p>
           </div>
           <button type="button" onClick={() => setOrderOpen(true)} className="rounded-full bg-accent px-6 py-3 font-display font-bold text-paper">
-            اطلب الملف
+            {t("idea.buyButton")}
           </button>
         </div>
       </div>
       <div className="h-20 lg:hidden" />
 
-      <Modal open={orderOpen} onClose={() => setOrderOpen(false)} title="طلب ملف فرصة">
+      <Modal open={orderOpen} onClose={() => setOrderOpen(false)} title={t("order.title")}>
         <OrderForm idea={idea} onDone={() => setOrderOpen(false)} />
       </Modal>
     </>

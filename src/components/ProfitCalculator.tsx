@@ -1,4 +1,5 @@
 import { useId, useState } from "react";
+import { useSite } from "./SiteProvider";
 import { Calculator } from "lucide-react";
 import type { Idea } from "../types";
 import { money, monthsLabel } from "../lib/format";
@@ -8,6 +9,7 @@ import { money, monthsLabel } from "../lib/format";
  * payback = capital ÷ monthly profit.
  */
 export default function ProfitCalculator({ idea }: { idea: Idea }) {
+  const { t } = useSite();
   const mid = Math.round((idea.capitalMin + idea.capitalMax) / 2 / 100) * 100;
   // default sales that reproduce the idea's own payback estimate at mid capital
   const defaultSales = Math.round(mid / idea.paybackMonths / (idea.marginPercent / 100) / 100) * 100;
@@ -25,14 +27,14 @@ export default function ProfitCalculator({ idea }: { idea: Idea }) {
     <div className="overflow-hidden rounded-3xl bg-card ring-1 ring-ink/10">
       <div className="flex items-center gap-2 bg-ink px-5 py-4 text-paper">
         <Calculator className="size-5 text-accent" />
-        <h2 className="font-display font-bold">احسبها على وضعك</h2>
-        <span className="mr-auto text-xs text-paper/50">تقدير تقريبي</span>
+        <h2 className="font-display font-bold">{t("calc.title")}</h2>
+        <span className="mr-auto text-xs text-paper/50">{t("calc.badge")}</span>
       </div>
       <div className="grid gap-6 p-5 md:grid-cols-2">
         <div className="space-y-6">
           <Slider
             id={capId}
-            label="رأس المال اللي معك"
+            label={t("calc.capital")}
             value={capital}
             min={idea.capitalMin}
             max={Math.round(idea.capitalMax * 1.5)}
@@ -41,7 +43,7 @@ export default function ProfitCalculator({ idea }: { idea: Idea }) {
           />
           <Slider
             id={salesId}
-            label="المبيعات الشهرية المتوقعة"
+            label={t("calc.sales")}
             value={sales}
             min={Math.round(defaultSales * 0.3 / 100) * 100 || 100}
             max={defaultSales * 3}
@@ -49,14 +51,14 @@ export default function ProfitCalculator({ idea }: { idea: Idea }) {
             onChange={setSales}
           />
           <p className="text-xs leading-relaxed text-muted">
-            الحساب على أساس هامش ربح {idea.marginPercent}% بعد المصاريف التشغيلية. الأرقام الدقيقة موجودة بالملف الكامل.
+            الحساب على أساس هامش ربح {idea.marginPercent}% بعد المصاريف التشغيلية. {t("calc.note")}
           </p>
         </div>
         <dl className="grid grid-cols-2 gap-3 self-start">
-          <Stat label="ربح شهري تقريبي" value={money(profit)} />
-          <Stat label="استرداد رأس المال" value={Number.isFinite(payback) ? monthsLabel(Math.ceil(payback)) : "—"} accent />
+          <Stat label={t("calc.profit")} value={money(profit)} />
+          <Stat label={t("calc.payback")} value={Number.isFinite(payback) ? monthsLabel(Math.ceil(payback)) : "—"} accent />
           <Stat
-            label="صافي أول سنة"
+            label={t("calc.year")}
             value={`${yearProfit < 0 ? "−" : ""}${money(Math.abs(yearProfit))}`}
             tone={yearProfit < 0 ? "text-accent-deep" : "text-success"}
             wide

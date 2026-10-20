@@ -6,15 +6,16 @@ import PageHeader from "../components/PageHeader";
 import Instagram from "../components/InstagramIcon";
 import { Field, TextArea } from "../components/Field";
 import { createContactMessage } from "../lib/api";
-import { useSite } from "../components/SiteProvider";
+import { Hl, useSite } from "../components/SiteProvider";
 
-const subjects = ["سؤال عام", "فكرة جاهزة", "مشروع مخصص", "ورشة", "تعاون"];
 
 
 export default function Contact() {
-  const { site } = useSite();
+  const { site, t, tl } = useSite();
+  const subjects = tl("contact.subjects");
   const faqs = site.faqs;
-  const [subject, setSubject] = useState(subjects[0]);
+  const [picked, setSubject] = useState("");
+  const subject = picked || subjects[0] || "";
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [open, setOpen] = useState<number | null>(0);
 
@@ -38,15 +39,15 @@ export default function Contact() {
   }
 
   const channels = [
-    { icon: Instagram, label: "إنستغرام", value: `@${site.instagramHandle}`, href: site.instagramUrl, ltr: true },
-    { icon: MessageCircle, label: "واتساب", value: site.whatsapp || "يُضاف لاحقاً", href: site.whatsapp ? `https://wa.me/${site.whatsapp.replace(/\D/g, "")}` : "", ltr: Boolean(site.whatsapp) },
-    { icon: Mail, label: "الإيميل", value: site.email || "يُضاف لاحقاً", href: site.email ? `mailto:${site.email}` : "", ltr: Boolean(site.email) },
+    { icon: Instagram, label: t("contact.instagram"), value: `@${site.instagramHandle}`, href: site.instagramUrl, ltr: true },
+    { icon: MessageCircle, label: t("contact.whatsapp"), value: site.whatsapp || t("contact.soon"), href: site.whatsapp ? `https://wa.me/${site.whatsapp.replace(/\D/g, "")}` : "", ltr: Boolean(site.whatsapp) },
+    { icon: Mail, label: t("contact.email"), value: site.email || t("contact.soon"), href: site.email ? `mailto:${site.email}` : "", ltr: Boolean(site.email) },
   ];
 
   return (
     <>
-      <PageHeader eyebrow="تواصل معنا" title={<>خلّينا <span className="text-accent">نحكي.</span></>}>
-        سؤال، فكرة، أو بدك تعرف من وين تبدأ؟ ابعتلنا ومنرد عليك بأقرب وقت.
+      <PageHeader eyebrow={t("contact.eyebrow")} title={<Hl text={t("contact.title")} hl={t("contact.titleHl")} />}>
+        {t("contact.intro")}
       </PageHeader>
 
       <Container className="grid gap-10 py-14 lg:grid-cols-[1.3fr_1fr]">
@@ -56,17 +57,17 @@ export default function Contact() {
             {state === "sent" ? (
               <motion.div key="ok" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="py-12 text-center">
                 <CheckCircle2 className="mx-auto size-16 text-success" />
-                <h2 className="mt-5 text-3xl font-black">وصلت رسالتك!</h2>
-                <p className="mt-2 text-ink-soft">منرد عليك خلال يوم عمل.</p>
+                <h2 className="mt-5 text-3xl font-black">{t("contact.successTitle")}</h2>
+                <p className="mt-2 text-ink-soft">{t("contact.successText")}</p>
                 <button type="button" onClick={() => setState("idle")} className="mt-6 text-sm font-semibold text-accent-deep hover:underline">
-                  ابعت رسالة ثانية
+                  {t("contact.again")}
                 </button>
               </motion.div>
             ) : (
               <motion.form key="form" onSubmit={submit} className="space-y-5" exit={{ opacity: 0 }}>
-                <h2 className="text-2xl font-black">ابعتلنا رسالة</h2>
+                <h2 className="text-2xl font-black">{t("contact.formTitle")}</h2>
                 <fieldset>
-                  <legend className="mb-2 text-sm font-medium">الموضوع</legend>
+                  <legend className="mb-2 text-sm font-medium">{t("contact.subjectLabel")}</legend>
                   <div className="flex flex-wrap gap-2">
                     {subjects.map((s) => (
                       <button
@@ -84,18 +85,18 @@ export default function Contact() {
                   </div>
                 </fieldset>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="الاسم" name="name" required minLength={2} autoComplete="name" />
-                  <Field label="هاتف أو إيميل" name="contact" required dir="ltr" className="[&_input]:text-right" />
+                  <Field label={t("form.name")} name="name" required minLength={2} autoComplete="name" />
+                  <Field label={t("contact.contactField")} name="contact" required dir="ltr" className="[&_input]:text-right" />
                 </div>
-                <TextArea label="رسالتك" name="message" required minLength={5} className="[&_textarea]:min-h-36" />
-                {state === "error" && <p className="text-sm text-accent-deep">صار خطأ، جرّب مرة ثانية.</p>}
+                <TextArea label={t("contact.messageField")} name="message" required minLength={5} className="[&_textarea]:min-h-36" />
+                {state === "error" && <p className="text-sm text-accent-deep">{t("form.error")}</p>}
                 <button
                   type="submit"
                   disabled={state === "sending"}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-8 py-4 font-display font-bold text-paper transition-colors hover:bg-accent-deep disabled:opacity-70 sm:w-auto"
                 >
                   {state === "sending" && <Loader2 className="size-4 animate-spin" />}
-                  {state === "sending" ? "عم نرسل…" : "أرسل الرسالة"}
+                  {state === "sending" ? t("form.sending") : t("contact.submit")}
                 </button>
               </motion.form>
             )}
@@ -112,8 +113,8 @@ export default function Contact() {
           >
             <div className="pointer-events-none absolute -bottom-20 -left-20 size-60 rounded-full bg-accent/40 blur-3xl" />
             <Instagram className="relative size-8 text-accent" />
-            <p className="relative mt-6 font-display text-2xl font-black">تابعنا على إنستغرام</p>
-            <p className="relative mt-1 text-paper/60">أفكار وفرص جديدة كل أسبوع.</p>
+            <p className="relative mt-6 font-display text-2xl font-black">{t("contact.igTitle")}</p>
+            <p className="relative mt-1 text-paper/60">{t("contact.igText")}</p>
             <span dir="ltr" className="relative mt-5 inline-flex items-center gap-2 rounded-full bg-paper px-4 py-2 text-sm font-bold text-ink transition-colors group-hover:bg-accent group-hover:text-paper">
               @{site.instagramHandle} <ArrowUpLeft className="size-4" />
             </span>
@@ -144,8 +145,8 @@ export default function Contact() {
       {/* FAQ */}
       {faqs.length > 0 && (
       <Container className="pt-6">
-        <p className="mb-3 font-mono text-xs text-accent-deep">/ أسئلة شائعة</p>
-        <h2 className="mb-8 text-4xl font-black sm:text-5xl">قبل ما تسأل…</h2>
+        <p className="mb-3 font-mono text-xs text-accent-deep">/ {t("contact.faqEyebrow")}</p>
+        <h2 className="mb-8 text-4xl font-black sm:text-5xl">{t("contact.faqTitle")}</h2>
         <div className="border-t-2 border-ink">
           {faqs.map((f, i) => (
             <div key={f.q} className="border-b-2 border-ink">

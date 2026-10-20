@@ -16,18 +16,19 @@ import WorkshopCard from "../components/WorkshopCard";
 import Skeleton from "../components/Skeleton";
 import { useAsync } from "../lib/useAsync";
 import { getIdeas, getInstagramPosts, getUpcomingWorkshops } from "../lib/api";
-import { useSite } from "../components/SiteProvider";
+import { Hl, useSite } from "../components/SiteProvider";
 
 const services = [
-  { n: "01", title: "أفكار جاهزة", text: "ملفات فرص بأرقامها: رأس المال، الاسترداد، الموردين، وخطة الإطلاق.", to: "/ideas" },
-  { n: "02", title: "مشروع مخصص", text: "بتحكيلنا ميزانيتك وظروفك، ومنبنيلك فكرة وخطة من الصفر على مقاسك.", to: "/custom" },
-  { n: "03", title: "ورشات عملية", text: "جلسات قصيرة وتطبيقية بتختصر عليك سنين من التجربة والخطأ.", to: "/workshops" },
+  { n: "01", key: "home.service1", to: "/ideas" },
+  { n: "02", key: "home.service2", to: "/custom" },
+  { n: "03", key: "home.service3", to: "/workshops" },
 ];
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export default function Home() {
-  const { site } = useSite();
+  const { site, t, tl } = useSite();
+  const marquee = tl("home.marquee");
   const postsQ = useAsync(() => getInstagramPosts(3));
   const ideasQ = useAsync(getIdeas);
   const workshopsQ = useAsync(() => getUpcomingWorkshops(2));
@@ -88,10 +89,10 @@ export default function Home() {
               className="mt-10 flex flex-wrap gap-3"
             >
               <ButtonLink to="/ideas" className="py-4">
-                تصفّح الفرص <ArrowUpLeft className="size-4" />
+                {t("hero.cta1")} <ArrowUpLeft className="size-4" />
               </ButtonLink>
               <ButtonLink to="/custom" variant="ghost" className="py-4">
-                اطلب مشروع مخصص
+                {t("hero.cta2")}
               </ButtonLink>
             </motion.div>
           </div>
@@ -102,7 +103,7 @@ export default function Home() {
             transition={{ delay: 0.4, duration: 0.9, ease }}
           >
             {ideas.length ? <FlapBoard ideas={ideas} /> : <Skeleton className="h-72" />}
-            <p className="mt-3 px-1 text-xs text-muted">* الأرقام تقديرية — التفاصيل الكاملة داخل كل ملف.</p>
+            <p className="mt-3 px-1 text-xs text-muted">{t("hero.boardNote")}</p>
           </motion.div>
         </Container>
       </section>
@@ -122,10 +123,10 @@ export default function Home() {
         <Container>
           <SectionHeading
             index="01"
-            eyebrow="من إنستغرام"
+            eyebrow={t("home.ig.eyebrow")}
             title={
               <>
-                آخر ما نشرناه <span className="text-outline text-ink">على الحساب</span>
+                <Hl text={t("home.ig.title")} hl={t("home.ig.titleHl")} className="text-outline text-ink" />
               </>
             }
             action={
@@ -151,7 +152,7 @@ export default function Home() {
       {/* ───────── Services (editorial list) ───────── */}
       <section className="py-16 sm:py-24">
         <Container>
-          <SectionHeading index="02" eyebrow="كيف منساعدك" title="ثلاث طرق لتبدأ." />
+          <SectionHeading index="02" eyebrow={t("home.services.eyebrow")} title={t("home.services.title")} />
           <div className="border-t-2 border-ink">
             {services.map((s) => (
               <Link
@@ -162,8 +163,8 @@ export default function Home() {
                 <span className="absolute inset-0 origin-right scale-x-0 bg-ink transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-x-100" />
                 <span className="relative font-mono text-sm text-accent-deep transition-colors group-hover:text-accent sm:text-base">{s.n}</span>
                 <span className="relative min-w-0 transition-colors duration-300 group-hover:text-paper">
-                  <span className="block font-display text-3xl font-black sm:text-6xl">{s.title}</span>
-                  <span className="mt-2 block max-w-xl text-sm text-ink-soft transition-colors group-hover:text-paper/70 sm:text-base">{s.text}</span>
+                  <span className="block font-display text-3xl font-black sm:text-6xl">{t(`${s.key}.title`)}</span>
+                  <span className="mt-2 block max-w-xl text-sm text-ink-soft transition-colors group-hover:text-paper/70 sm:text-base">{t(`${s.key}.text`)}</span>
                 </span>
                 <span className="relative grid size-12 place-items-center rounded-full ring-2 ring-ink transition-all duration-300 group-hover:rotate-45 group-hover:bg-accent group-hover:ring-accent sm:size-16">
                   <ArrowUpLeft className="size-5 transition-colors group-hover:text-paper sm:size-6" />
@@ -179,15 +180,15 @@ export default function Home() {
         <Container>
           <SectionHeading
             index="03"
-            eyebrow="تذاكر مختارة"
+            eyebrow={t("home.featured.eyebrow")}
             title={
               <>
-                فرص <span className="text-accent">جاهزة</span> للتنفيذ
+                <Hl text={t("home.featured.title")} hl={t("home.featured.titleHl")} />
               </>
             }
             action={
               <ButtonLink to="/ideas" variant="ghost">
-                كل الفرص <ArrowUpLeft className="size-4" />
+                {t("home.featured.button")} <ArrowUpLeft className="size-4" />
               </ButtonLink>
             }
           />
@@ -208,12 +209,12 @@ export default function Home() {
         <Container>
           <div className="grid gap-10 lg:grid-cols-[1fr_1.7fr] lg:items-start">
             <div className="lg:sticky lg:top-32">
-              <p className="mb-3 font-mono text-xs text-accent-deep">/ 04 — اختبار سريع</p>
+              <p className="mb-3 font-mono text-xs text-accent-deep">/ 04 — {t("home.quiz.eyebrow")}</p>
               <h2 className="text-4xl leading-[1.1] font-black sm:text-6xl">
-                محتار <span className="text-outline">من وين</span> تبدأ؟
+                <Hl text={t("home.quiz.title")} hl={t("home.quiz.titleHl")} className="text-outline" />
               </h2>
               <p className="mt-5 text-lg leading-relaxed text-ink-soft">
-                3 أسئلة، وأقل من دقيقة، ومنطلعلك الفرص الأقرب لميزانيتك واهتمامك وخبرتك.
+                {t("home.quiz.text")}
               </p>
             </div>
             {ideasQ.loading ? <Skeleton className="h-80" /> : <IdeaFinder ideas={ideas} />}
@@ -226,11 +227,11 @@ export default function Home() {
         <Container>
           <SectionHeading
             index="05"
-            eyebrow="الورشات القادمة"
-            title="تعلّم قبل ما تبدأ."
+            eyebrow={t("home.workshops.eyebrow")}
+            title={t("home.workshops.title")}
             action={
               <ButtonLink to="/workshops" variant="ghost">
-                كل الورشات <ArrowUpLeft className="size-4" />
+                {t("home.workshops.button")} <ArrowUpLeft className="size-4" />
               </ButtonLink>
             }
           />
@@ -252,7 +253,7 @@ export default function Home() {
           <div className="flex w-max animate-marquee [--marquee-duration:30s] group-hover:[animation-play-state:paused]">
             {[0, 1].map((k) => (
               <div key={k} className="flex shrink-0 items-center" aria-hidden={k === 1}>
-                {["مشروعك", "على مقاسك", "من الصفر", "مشروعك", "على مقاسك", "من الصفر"].map((w, i) => (
+                {[...marquee, ...marquee, ...marquee].map((w, i) => (
                   <span key={i} className="flex items-center">
                     <span className={`px-6 font-display text-5xl font-black whitespace-nowrap sm:text-8xl ${i % 2 ? "text-outline" : ""}`}>{w}</span>
                     <span className="size-4 rounded-full bg-ink sm:size-6" />
@@ -264,10 +265,10 @@ export default function Home() {
         </Link>
         <Container className="mt-10 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
           <p className="max-w-xl text-lg leading-relaxed text-ink-soft">
-            ما في فكرة بتناسبك؟ احكيلنا عن ميزانيتك ومدينتك ووقتك، ومنرجعلك بملف فرصة كامل مبني على وضعك أنت.
+            {t("home.cta.text")}
           </p>
           <ButtonLink to="/custom" variant="ink" className="shrink-0 py-4">
-            ابدأ طلبك <ArrowUpLeft className="size-4" />
+            {t("home.cta.button")} <ArrowUpLeft className="size-4" />
           </ButtonLink>
         </Container>
       </section>

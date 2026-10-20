@@ -33,4 +33,5 @@ export const defaultSite: SiteInfo = {
   heroWords: ["فرصة مدروسة", "خطة واضحة", "أرقام حقيقية"],
   faqs: [],
   customForm: defaultCustomForm,
+  texts: {},
 };

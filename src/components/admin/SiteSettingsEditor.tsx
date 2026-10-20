@@ -5,8 +5,10 @@ import { getSiteInfo, saveSiteInfo } from "../../lib/api";
 import { useSite } from "../SiteProvider";
 import Skeleton from "../Skeleton";
 import { Field, TextArea } from "../Field";
+import { defaultTexts, textGroups } from "../../data/texts";
 
-export default function SiteSettingsEditor() {
+/** One admin tab of site settings. `section` is "hero" | "contactinfo" | "customform" | "faq" | "texts:<groupId>". */
+export default function SiteSettingsEditor({ section }: { section: string }) {
   const { reload } = useSite();
   const [s, setS] = useState<SiteInfo | null>(null);
   const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -14,6 +16,8 @@ export default function SiteSettingsEditor() {
   useEffect(() => {
     getSiteInfo().then(setS);
   }, []);
+
+  const group = section.startsWith("texts:") ? textGroups.find((g) => g.id === section.slice(6)) : undefined;
 
   if (!s) return <Skeleton className="h-96" />;
 
@@ -48,7 +52,8 @@ export default function SiteSettingsEditor() {
 
   return (
     <form onSubmit={submit} className="space-y-6 pb-24">
-      <Section title="القسم الأول بالرئيسية">
+      {section === "hero" && (
+      <Section>
         <Field label="الشارة الصغيرة فوق العنوان" value={s.heroBadge} onChange={(e) => set("heroBadge", e.target.value)} />
         <Field label="السطر الأول من العنوان" required value={s.heroTitle} onChange={(e) => set("heroTitle", e.target.value)} />
         <Field label="بداية السطر الثاني" value={s.heroPrefix} onChange={(e) => set("heroPrefix", e.target.value)} hint="بتيجي قبل الكلمة اللي بتتبدّل" />
@@ -60,8 +65,10 @@ export default function SiteSettingsEditor() {
         />
         <TextArea label="الوصف التعريفي" required value={s.about} onChange={(e) => set("about", e.target.value)} />
       </Section>
+      )}
 
-      <Section title="معلومات التواصل">
+      {section === "contactinfo" && (
+      <Section>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="حساب إنستغرام" value={s.instagramHandle} onChange={(e) => set("instagramHandle", e.target.value)} dir="ltr" className="[&_input]:text-right" hint="بدون @ — مثلاً hura_business_projects" />
           <Field label="رقم الواتساب" value={s.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} dir="ltr" className="[&_input]:text-right" hint="مع رمز الدولة، مثلاً ‎+970599123456" />
@@ -70,8 +77,10 @@ export default function SiteSettingsEditor() {
         </div>
         <Field label="الجملة التعريفية (بالفوتر)" value={s.tagline} onChange={(e) => set("tagline", e.target.value)} />
       </Section>
+      )}
 
-      <Section title="نموذج «مشروع مخصص»">
+      {section === "customform" && (
+      <Section>
         <p className="-mt-2 text-sm text-muted">نصوص الأسئلة والخيارات اللي بتظهر للزائر بصفحة المشروع المخصص.</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-3 rounded-2xl bg-paper p-4">
@@ -117,8 +126,10 @@ export default function SiteSettingsEditor() {
         </button>
         <Field label="ملاحظة تحت الخطوات" value={cf.note} onChange={(e) => setCf("note", e.target.value)} />
       </Section>
+      )}
 
-      <Section title="الأسئلة الشائعة (صفحة التواصل)">
+      {section === "faq" && (
+      <Section>
         {s.faqs.map((f, i) => (
           <div key={i} className="relative space-y-3 rounded-2xl bg-paper p-4 pl-12">
             <button
@@ -141,6 +152,39 @@ export default function SiteSettingsEditor() {
           <Plus className="size-4" /> سؤال جديد
         </button>
       </Section>
+      )}
+
+      {group && (
+        <Section>
+          {group.hint && <p className="-mt-2 text-sm text-muted">{group.hint}</p>}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {group.fields.map((f) => {
+              const value = s.texts[f.key] ?? defaultTexts[f.key] ?? "";
+              const changed = value !== f.default;
+              const props = {
+                label: f.label,
+                value,
+                onChange: (e: { target: { value: string } }) => set("texts", { ...s.texts, [f.key]: e.target.value }),
+              };
+              const wide = f.multiline || f.list || f.label.length > 30;
+              return (
+                <div key={f.key} className={`relative ${wide ? "sm:col-span-2" : ""}`}>
+                  {f.multiline || f.list ? <TextArea {...props} className="[&_textarea]:min-h-20" /> : <Field {...props} />}
+                  {changed && (
+                    <button
+                      type="button"
+                      onClick={() => set("texts", { ...s.texts, [f.key]: f.default })}
+                      className="absolute top-0 left-0 text-xs text-muted hover:text-accent-deep"
+                    >
+                      رجّع الأصلي
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </Section>
+      )}
 
       {/* sticky save bar */}
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-ink/10 bg-card/95 p-3 backdrop-blur">
@@ -156,10 +200,10 @@ export default function SiteSettingsEditor() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4 rounded-2xl bg-card p-5 ring-1 ring-ink/10">
-      <h2 className="text-lg font-black">{title}</h2>
+      {title && <h2 className="text-lg font-black">{title}</h2>}
       {children}
     </section>
   );

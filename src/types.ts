@@ -91,6 +91,8 @@ export interface SiteInfo {
   heroWords: string[];
   faqs: Faq[];
   customForm: CustomFormConfig;
+  /** Overrides for texts defined in src/data/texts.ts (key → text). */
+  texts: Record<string, string>;
 }
 
 export type RequestStatus = "جديد" | "قيد المتابعة" | "مكتمل";

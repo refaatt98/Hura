@@ -3,6 +3,7 @@ import { ArrowUpLeft, Check, Plus } from "lucide-react";
 import type { Idea } from "../types";
 import { compactRange, money, monthsLabel } from "../lib/format";
 import DifficultyMeter from "./DifficultyMeter";
+import { useSite } from "./SiteProvider";
 
 interface Props {
   idea: Idea;
@@ -14,6 +15,7 @@ interface Props {
 
 /** An idea presented as an "opportunity ticket" with a tear-off stub. */
 export default function IdeaCard({ idea, compare, notch = "var(--color-paper)" }: Props) {
+  const { t } = useSite();
   return (
     <div className="relative h-full">
       <Link
@@ -75,7 +77,7 @@ export default function IdeaCard({ idea, compare, notch = "var(--color-paper)" }
           }`}
         >
           {compare.selected ? <Check className="size-3.5" /> : <Plus className="size-3.5" />}
-          قارن
+          {t("ideas.compare")}
         </button>
       )}
     </div>

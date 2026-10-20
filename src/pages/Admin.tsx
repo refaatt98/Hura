@@ -6,7 +6,11 @@ import {
   FileText,
   Inbox,
   Image as ImageIcon,
-  Settings,
+  Type,
+  Phone,
+  HelpCircle,
+  ClipboardList,
+  Home as HomeIcon,
   LayoutDashboard,
   Mail,
   Pencil,
@@ -37,27 +41,59 @@ import {
   saveIdea,
 } from "../lib/api";
 import { formatDate, money } from "../lib/format";
+import { textGroups } from "../data/texts";
 import type { Idea, RequestStatus, SubmissionKind, Workshop } from "../types";
 
-type Tab = "overview" | SubmissionKind | "ideas" | "workshops" | "instagram" | "settings";
+type Tab = string;
 
-const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
-  { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
-  { id: "orders", label: "طلبات الأفكار", icon: ShoppingBag },
-  { id: "custom", label: "مشاريع مخصصة", icon: Sparkles },
-  { id: "registrations", label: "تسجيلات الورشات", icon: Users },
-  { id: "messages", label: "الرسائل", icon: Mail },
-  { id: "ideas", label: "إدارة الأفكار", icon: FileText },
-  { id: "workshops", label: "إدارة الورشات", icon: CalendarDays },
-  { id: "instagram", label: "منشورات إنستغرام", icon: ImageIcon },
-  { id: "settings", label: "إعدادات الموقع", icon: Settings },
+interface TabDef {
+  id: Tab;
+  label: string;
+  icon: LucideIcon;
+}
+
+const tabGroups: { title: string; tabs: TabDef[] }[] = [
+  {
+    title: "الطلبات",
+    tabs: [
+      { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
+      { id: "orders", label: "طلبات الأفكار", icon: ShoppingBag },
+      { id: "custom", label: "مشاريع مخصصة", icon: Sparkles },
+      { id: "registrations", label: "تسجيلات الورشات", icon: Users },
+      { id: "messages", label: "الرسائل", icon: Mail },
+    ],
+  },
+  {
+    title: "المحتوى",
+    tabs: [
+      { id: "ideas", label: "الأفكار", icon: FileText },
+      { id: "workshops", label: "الورشات", icon: CalendarDays },
+      { id: "instagram", label: "منشورات إنستغرام", icon: ImageIcon },
+    ],
+  },
+  {
+    title: "الإعدادات",
+    tabs: [
+      { id: "hero", label: "القسم الأول بالرئيسية", icon: HomeIcon },
+      { id: "contactinfo", label: "معلومات التواصل", icon: Phone },
+      { id: "faq", label: "الأسئلة الشائعة", icon: HelpCircle },
+      { id: "customform", label: "نموذج مشروع مخصص", icon: ClipboardList },
+    ],
+  },
+  {
+    title: "نصوص الموقع",
+    tabs: textGroups.map((g) => ({ id: `texts:${g.id}`, label: g.label, icon: Type })),
+  },
 ];
+
+const tabs: TabDef[] = tabGroups.flatMap((g) => g.tabs);
+const settingsTabs = new Set(["hero", "contactinfo", "faq", "customform"]);
 
 const submissionKinds: SubmissionKind[] = ["orders", "custom", "registrations", "messages"];
 
 export default function Admin() {
   const [params, setParams] = useSearchParams();
-  const tab = (tabs.find((t) => t.id === params.get("tab"))?.id ?? "overview") as Tab;
+  const tab: Tab = tabs.find((t) => t.id === params.get("tab"))?.id ?? "overview";
   const [newCounts, setNewCounts] = useState<Partial<Record<SubmissionKind, number>>>({});
 
   const refreshCounts = useCallback(() => {
@@ -93,26 +129,59 @@ export default function Admin() {
       </header>
 
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[240px_1fr]">
-        {/* nav */}
-        <nav className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:sticky lg:top-22 lg:self-start" aria-label="أقسام الإدارة">
-          {tabs.map((t) => {
-            const n = t.id in newCounts ? newCounts[t.id as SubmissionKind] : 0;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => go(t.id)}
-                aria-current={tab === t.id ? "page" : undefined}
-                className={`flex shrink-0 items-center gap-2.5 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors lg:rounded-xl ${
-                  tab === t.id ? "bg-ink text-paper" : "text-ink-soft hover:bg-card"
-                }`}
-              >
-                <t.icon className="size-4" />
-                {t.label}
-                {Boolean(n) && <span className="mr-auto grid min-w-5 place-items-center rounded-full bg-accent px-1.5 text-[11px] text-paper">{n}</span>}
-              </button>
-            );
-          })}
+        {/* nav: dropdown on mobile, grouped sidebar on desktop */}
+        <label className="lg:hidden">
+          <span className="sr-only">القسم</span>
+          <select
+            value={tab}
+            onChange={(e) => go(e.target.value)}
+            className="w-full rounded-2xl bg-ink px-4 py-3.5 font-display font-bold text-paper focus:outline-none"
+          >
+            {tabGroups.map((g) => (
+              <optgroup key={g.title} label={g.title}>
+                {g.tabs.map((t) => {
+                  const n = newCounts[t.id as SubmissionKind];
+                  return (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                      {n ? ` (${n} جديد)` : ""}
+                    </option>
+                  );
+                })}
+              </optgroup>
+            ))}
+          </select>
+        </label>
+
+        <nav
+          className="hidden space-y-5 lg:sticky lg:top-22 lg:block lg:max-h-[calc(100dvh-7rem)] lg:self-start lg:overflow-y-auto lg:pb-6"
+          aria-label="أقسام الإدارة"
+        >
+          {tabGroups.map((g) => (
+            <div key={g.title}>
+              <p className="mb-1.5 px-3 text-xs font-semibold text-muted">{g.title}</p>
+              <div className="space-y-0.5">
+                {g.tabs.map((t) => {
+                  const n = newCounts[t.id as SubmissionKind];
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => go(t.id)}
+                      aria-current={tab === t.id ? "page" : undefined}
+                      className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-right text-sm font-semibold transition-colors ${
+                        tab === t.id ? "bg-ink text-paper" : "text-ink-soft hover:bg-card"
+                      }`}
+                    >
+                      <t.icon className="size-4 shrink-0" />
+                      <span className="min-w-0 flex-1 truncate">{t.label}</span>
+                      {Boolean(n) && <span className="grid min-w-5 place-items-center rounded-full bg-accent px-1.5 text-[11px] text-paper">{n}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         <main className="min-w-0">
@@ -122,7 +191,7 @@ export default function Admin() {
           {tab === "ideas" && <IdeasManager />}
           {tab === "workshops" && <WorkshopsManager />}
           {tab === "instagram" && <InstagramManager />}
-          {tab === "settings" && <SiteSettingsEditor />}
+          {(settingsTabs.has(tab) || tab.startsWith("texts:")) && <SiteSettingsEditor key={tab} section={tab} />}
         </main>
       </div>
     </div>

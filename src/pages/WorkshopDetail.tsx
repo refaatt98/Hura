@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSite } from "../components/SiteProvider";
 import { Link, useParams } from "react-router";
 import { ArrowRight, CalendarDays, Clock, MapPin, User, Users } from "lucide-react";
 import Container from "../components/Container";
@@ -12,6 +13,7 @@ import { getWorkshop, getWorkshops } from "../lib/api";
 import { formatDate, formatTime, hoursLabel, money } from "../lib/format";
 
 export default function WorkshopDetail() {
+  const { t } = useSite();
   const { id = "" } = useParams();
   const { data: w, loading } = useAsync(() => getWorkshop(id), [id]);
   const { data: all } = useAsync(getWorkshops);
@@ -33,10 +35,10 @@ export default function WorkshopDetail() {
   const others = (all ?? []).filter((x) => x.id !== w.id && x.date >= new Date().toISOString()).slice(0, 2);
 
   const facts = [
-    { icon: CalendarDays, label: "التاريخ", value: formatDate(w.date) },
-    { icon: Clock, label: "الوقت والمدة", value: `${formatTime(w.date)} · ${hoursLabel(w.durationHours)}` },
+    { icon: CalendarDays, label: t("workshop.date"), value: formatDate(w.date) },
+    { icon: Clock, label: t("workshop.time"), value: `${formatTime(w.date)} · ${hoursLabel(w.durationHours)}` },
     { icon: MapPin, label: w.mode, value: w.location },
-    { icon: User, label: "المدرّب", value: w.trainer },
+    { icon: User, label: t("workshop.trainer"), value: w.trainer },
   ];
 
   return (
@@ -45,7 +47,7 @@ export default function WorkshopDetail() {
         <div className="pointer-events-none absolute -top-40 -left-40 size-[28rem] rounded-full bg-accent/25 blur-[120px]" />
         <Container className="relative pt-28 pb-12 sm:pt-36 sm:pb-16">
           <Link to="/workshops" className="mb-8 inline-flex items-center gap-1.5 text-sm text-paper/50 hover:text-paper">
-            <ArrowRight className="size-4" /> كل الورشات
+            <ArrowRight className="size-4" /> {t("workshop.back")}
           </Link>
           <div className="flex flex-wrap items-center gap-3">
             <span className={`rounded-full px-3 py-1 text-xs font-bold ${w.mode === "أونلاين" ? "bg-paper text-ink" : "bg-accent text-paper"}`}>{w.mode}</span>
@@ -70,12 +72,12 @@ export default function WorkshopDetail() {
       <Container className="grid gap-10 py-12 lg:grid-cols-[1fr_380px]">
         <div className="min-w-0 space-y-12">
           <Reveal>
-            <h2 className="mb-3 text-3xl font-black">عن الورشة</h2>
+            <h2 className="mb-3 text-3xl font-black">{t("workshop.aboutTitle")}</h2>
             <p className="text-lg leading-loose text-ink-soft">{w.description}</p>
           </Reveal>
 
           <Reveal>
-            <h2 className="mb-6 text-3xl font-black">البرنامج</h2>
+            <h2 className="mb-6 text-3xl font-black">{t("workshop.agendaTitle")}</h2>
             <ol className="relative space-y-4 border-r-2 border-dashed border-line pr-6">
               {w.agenda.map((a, i) => (
                 <li key={a} className="relative">
@@ -94,13 +96,13 @@ export default function WorkshopDetail() {
           <div className="overflow-hidden rounded-3xl bg-card ring-1 ring-ink/10 shadow-[0_30px_60px_-30px_rgba(14,24,48,.5)]">
             <div className="bg-ink p-5 text-paper">
               <div className="flex items-center justify-between text-sm">
-                <span className="inline-flex items-center gap-1.5"><Users className="size-4" /> المقاعد</span>
-                <span className="font-mono">{left} / {w.seats} متبقي</span>
+                <span className="inline-flex items-center gap-1.5"><Users className="size-4" /> {t("workshop.seats")}</span>
+                <span className="font-mono">{left} / {w.seats} {t("workshop.left")}</span>
               </div>
               <div className="mt-3 h-2 overflow-hidden rounded-full bg-paper/15">
                 <div className="h-full rounded-full bg-accent transition-[width] duration-700" style={{ width: `${pct}%` }} />
               </div>
-              {left > 0 && left <= 5 && <p className="mt-2 text-xs text-flap-amber">باقي {left} مقاعد بس!</p>}
+              {left > 0 && left <= 5 && <p className="mt-2 text-xs text-flap-amber">{t("workshop.fewLeft", { n: String(left) })}</p>}
             </div>
             <div className="p-5">
               <RegistrationForm workshop={{ ...w, seatsTaken: taken }} onRegistered={(n) => setExtra((e) => e + n)} />
@@ -111,7 +113,7 @@ export default function WorkshopDetail() {
 
       {others.length > 0 && (
         <Container>
-          <h2 className="mb-6 text-3xl font-black">ورشات ثانية</h2>
+          <h2 className="mb-6 text-3xl font-black">{t("workshop.othersTitle")}</h2>
           <div className="grid gap-5 lg:grid-cols-2">
             {others.map((o) => <WorkshopCard key={o.id} workshop={o} />)}
           </div>

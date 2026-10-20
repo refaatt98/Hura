@@ -7,6 +7,7 @@
  */
 import { supabase } from "./supabase";
 import { defaultCustomForm, defaultSite } from "../data/site";
+import { defaultTexts } from "../data/texts";
 import type {
   ContactMessage,
   CustomFormConfig,
@@ -67,6 +68,7 @@ export async function getSiteInfo(): Promise<SiteInfo> {
     heroWords: data.hero_words ?? [],
     faqs: (data.faqs as Faq[]) ?? [],
     customForm: { ...defaultCustomForm, ...((data.custom_form as Partial<CustomFormConfig>) ?? {}) },
+    texts: (data.texts as Record<string, string>) ?? {},
   };
 }
 
@@ -88,6 +90,8 @@ export async function saveSiteInfo(s: SiteInfo): Promise<void> {
       hero_prefix: s.heroPrefix,
       hero_words: s.heroWords.filter(Boolean),
       faqs: s.faqs.filter((f) => f.q.trim() && f.a.trim()),
+      // store only texts that differ from the built-in defaults
+      texts: Object.fromEntries(Object.entries(s.texts).filter(([k, v]) => v !== defaultTexts[k])),
       custom_form: {
         ...s.customForm,
         fields: list(s.customForm.fields),

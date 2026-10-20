@@ -11,7 +11,7 @@ import { useSite } from "./SiteProvider";
 export default function Header() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
-  const { site } = useSite();
+  const { site, t } = useSite();
 
   useEffect(() => {
     setOpen(false);
@@ -37,7 +37,7 @@ export default function Header() {
               {({ isActive }) => (
                 <>
                   {isActive && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-ink" transition={{ type: "spring", stiffness: 400, damping: 32 }} />}
-                  <span className="relative">{l.label}</span>
+                  <span className="relative">{t(l.key)}</span>
                 </>
               )}
             </NavLink>
@@ -49,7 +49,7 @@ export default function Header() {
             to="/custom"
             className="hidden items-center gap-1.5 rounded-full bg-accent px-5 py-2.5 font-display text-sm font-bold text-paper transition-colors hover:bg-accent-deep sm:inline-flex"
           >
-            اطلب مشروعك <ArrowUpLeft className="size-4" />
+            {t("header.cta")} <ArrowUpLeft className="size-4" />
           </NavLink>
           <button
             type="button"
@@ -82,14 +82,14 @@ export default function Header() {
                     `flex items-baseline justify-between border-b border-paper/10 py-4 font-display text-4xl font-extrabold ${isActive ? "text-accent" : "text-paper"}`
                   }
                 >
-                  {l.label}
+                  {t(l.key)}
                   <span className="font-mono text-xs text-paper/40">0{i + 1}</span>
                 </NavLink>
               </motion.div>
             ))}
             <div className="mt-auto flex items-center justify-between gap-3">
               <NavLink to="/custom" className="flex-1 rounded-full bg-accent py-4 text-center font-display font-bold">
-                اطلب مشروعك المخصص
+                {t("header.mobileCta")}
               </NavLink>
               <a href={site.instagramUrl} target="_blank" rel="noreferrer" className="grid size-14 place-items-center rounded-full ring-1 ring-paper/30" aria-label="إنستغرام">
                 <Instagram className="size-5" />
