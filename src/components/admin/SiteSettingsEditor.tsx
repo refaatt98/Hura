@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
-import type { SiteInfo } from "../../types";
+import type { CustomFormConfig, SiteInfo } from "../../types";
 import { getSiteInfo, saveSiteInfo } from "../../lib/api";
 import { useSite } from "../SiteProvider";
 import Skeleton from "../Skeleton";
@@ -21,6 +21,17 @@ export default function SiteSettingsEditor() {
     setS({ ...s, [k]: v });
     setState("idle");
   };
+
+  const cf = s.customForm;
+  const setCf = <K extends keyof CustomFormConfig>(k: K, v: CustomFormConfig[K]) => set("customForm", { ...cf, [k]: v });
+  const lines = (k: "fields" | "budgets" | "timelines" | "contactWays", label: string) => (
+    <TextArea
+      label={`${label} (كل خيار بسطر)`}
+      value={cf[k].join("\n")}
+      onChange={(e) => setCf(k, e.target.value.split("\n"))}
+      className="[&_textarea]:min-h-28"
+    />
+  );
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -58,6 +69,53 @@ export default function SiteSettingsEditor() {
           <Field label="المدينة" value={s.city} onChange={(e) => set("city", e.target.value)} />
         </div>
         <Field label="الجملة التعريفية (بالفوتر)" value={s.tagline} onChange={(e) => set("tagline", e.target.value)} />
+      </Section>
+
+      <Section title="نموذج «مشروع مخصص»">
+        <p className="-mt-2 text-sm text-muted">نصوص الأسئلة والخيارات اللي بتظهر للزائر بصفحة المشروع المخصص.</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-3 rounded-2xl bg-paper p-4">
+            <Field label="سؤال المجال" value={cf.fieldQuestion} onChange={(e) => setCf("fieldQuestion", e.target.value)} />
+            {lines("fields", "خيارات المجال")}
+          </div>
+          <div className="space-y-3 rounded-2xl bg-paper p-4">
+            <Field label="سؤال الميزانية" value={cf.budgetQuestion} onChange={(e) => setCf("budgetQuestion", e.target.value)} />
+            {lines("budgets", "خيارات الميزانية")}
+          </div>
+          <div className="space-y-3 rounded-2xl bg-paper p-4">
+            <Field label="سؤال وقت البداية" value={cf.timelineQuestion} onChange={(e) => setCf("timelineQuestion", e.target.value)} />
+            {lines("timelines", "خيارات وقت البداية")}
+          </div>
+          <div className="space-y-3 rounded-2xl bg-paper p-4">
+            <Field label="سؤال طريقة التواصل" value={cf.contactQuestion} onChange={(e) => setCf("contactQuestion", e.target.value)} />
+            {lines("contactWays", "طرق التواصل")}
+          </div>
+        </div>
+        <Field label="عنوان خانة الفكرة المبدئية" value={cf.ideaQuestion} onChange={(e) => setCf("ideaQuestion", e.target.value)} />
+
+        <h3 className="pt-2 font-display font-bold">خطوات «كيف منشتغل»</h3>
+        {cf.steps.map((st, i) => (
+          <div key={i} className="relative grid gap-3 rounded-2xl bg-paper p-4 pl-12 sm:grid-cols-[1fr_2fr]">
+            <button
+              type="button"
+              onClick={() => setCf("steps", cf.steps.filter((_, k) => k !== i))}
+              className="absolute top-3 left-3 grid size-8 place-items-center rounded-full text-accent-deep hover:bg-accent-soft"
+              aria-label="حذف الخطوة"
+            >
+              <Trash2 className="size-4" />
+            </button>
+            <Field label={`خطوة ${i + 1}`} value={st.t} onChange={(e) => setCf("steps", cf.steps.map((x, k) => (k === i ? { ...x, t: e.target.value } : x)))} />
+            <Field label="الوصف" value={st.d} onChange={(e) => setCf("steps", cf.steps.map((x, k) => (k === i ? { ...x, d: e.target.value } : x)))} />
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => setCf("steps", [...cf.steps, { t: "", d: "" }])}
+          className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-ink/20 hover:ring-ink"
+        >
+          <Plus className="size-4" /> خطوة جديدة
+        </button>
+        <Field label="ملاحظة تحت الخطوات" value={cf.note} onChange={(e) => setCf("note", e.target.value)} />
       </Section>
 
       <Section title="الأسئلة الشائعة (صفحة التواصل)">

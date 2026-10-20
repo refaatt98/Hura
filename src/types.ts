@@ -55,6 +55,26 @@ export interface Faq {
   a: string;
 }
 
+export interface ProcessStep {
+  t: string;
+  d: string;
+}
+
+/** Editable texts and options of the "custom project" form. */
+export interface CustomFormConfig {
+  fieldQuestion: string;
+  fields: string[];
+  ideaQuestion: string;
+  budgetQuestion: string;
+  budgets: string[];
+  timelineQuestion: string;
+  timelines: string[];
+  contactQuestion: string;
+  contactWays: string[];
+  steps: ProcessStep[];
+  note: string;
+}
+
 export interface SiteInfo {
   name: string;
   tagline: string;
@@ -70,6 +90,7 @@ export interface SiteInfo {
   heroPrefix: string;
   heroWords: string[];
   faqs: Faq[];
+  customForm: CustomFormConfig;
 }
 
 export type RequestStatus = "جديد" | "قيد المتابعة" | "مكتمل";

@@ -6,9 +6,10 @@
  * The `to*` / `from*` helpers below translate between the two.
  */
 import { supabase } from "./supabase";
-import { defaultSite } from "../data/site";
+import { defaultCustomForm, defaultSite } from "../data/site";
 import type {
   ContactMessage,
+  CustomFormConfig,
   CustomRequest,
   Difficulty,
   Faq,
@@ -65,8 +66,11 @@ export async function getSiteInfo(): Promise<SiteInfo> {
     heroPrefix: data.hero_prefix,
     heroWords: data.hero_words ?? [],
     faqs: (data.faqs as Faq[]) ?? [],
+    customForm: { ...defaultCustomForm, ...((data.custom_form as Partial<CustomFormConfig>) ?? {}) },
   };
 }
+
+const list = (xs: string[]) => xs.map((x) => x.trim()).filter(Boolean);
 
 export async function saveSiteInfo(s: SiteInfo): Promise<void> {
   const { error } = await supabase
@@ -84,6 +88,14 @@ export async function saveSiteInfo(s: SiteInfo): Promise<void> {
       hero_prefix: s.heroPrefix,
       hero_words: s.heroWords.filter(Boolean),
       faqs: s.faqs.filter((f) => f.q.trim() && f.a.trim()),
+      custom_form: {
+        ...s.customForm,
+        fields: list(s.customForm.fields),
+        budgets: list(s.customForm.budgets),
+        timelines: list(s.customForm.timelines),
+        contactWays: list(s.customForm.contactWays),
+        steps: s.customForm.steps.filter((x) => x.t.trim()),
+      },
       updated_at: new Date().toISOString(),
     })
     .eq("id", 1);

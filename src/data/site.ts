@@ -1,4 +1,18 @@
-import type { SiteInfo } from "../types";
+import type { CustomFormConfig, SiteInfo } from "../types";
+
+export const defaultCustomForm: CustomFormConfig = {
+  fieldQuestion: "بأي مجال حابب تشتغل؟",
+  fields: ["أكل ومشروبات", "تجارة إلكترونية", "خدمات", "تعليم وتدريب", "تجميل وموضة", "صناعة وحِرف", "تقنية", "مش متأكد"],
+  ideaQuestion: "عندك فكرة مبدئية؟ احكيلنا عنها",
+  budgetQuestion: "قديش الميزانية المتوفرة؟",
+  budgets: ["أقل من 10,000 ₪", "بين 10,000 و 35,000 ₪", "بين 35,000 و 100,000 ₪", "أكثر من 100,000 ₪"],
+  timelineQuestion: "إمتى ناوي تبدأ؟",
+  timelines: ["خلال شهر", "من 1 إلى 3 أشهر", "من 3 إلى 6 أشهر", "لسا بستكشف"],
+  contactQuestion: "كيف بتحب نتواصل معك؟",
+  contactWays: ["واتساب", "اتصال"],
+  steps: [],
+  note: "",
+};
 
 /**
  * Fallback content shown for a split second before the real settings load
@@ -18,4 +32,5 @@ export const defaultSite: SiteInfo = {
   heroPrefix: "ابدأ من",
   heroWords: ["فرصة مدروسة", "خطة واضحة", "أرقام حقيقية"],
   faqs: [],
+  customForm: defaultCustomForm,
 };

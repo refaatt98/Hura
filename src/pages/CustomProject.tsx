@@ -6,24 +6,16 @@ import PageHeader from "../components/PageHeader";
 import ButtonLink from "../components/ButtonLink";
 import { Field, TextArea } from "../components/Field";
 import { createCustomRequest } from "../lib/api";
+import { useSite } from "../components/SiteProvider";
 import type { NewCustomRequest } from "../types";
-
-const fields = ["أكل ومشروبات", "تجارة إلكترونية", "خدمات", "تعليم وتدريب", "تجميل وموضة", "صناعة وحِرف", "تقنية", "مش متأكد"];
-const budgets = ["أقل من 10,000 ₪", "بين 10,000 و 35,000 ₪", "بين 35,000 و 100,000 ₪", "أكثر من 100,000 ₪"];
-const timelines = ["خلال شهر", "من 1 إلى 3 أشهر", "من 3 إلى 6 أشهر", "لسا بستكشف"];
-const contactWays = ["واتساب", "اتصال", "إيميل"];
 
 const steps = ["المجال", "الميزانية", "معلوماتك", "المراجعة"];
 
-const process = [
-  { n: "01", t: "بنسمعك", d: "منحكي معك 20 دقيقة عن وضعك وأهدافك." },
-  { n: "02", t: "بنبحث", d: "مندرس السوق بمدينتك والفرص المناسبة لميزانيتك." },
-  { n: "03", t: "بنسلّمك الملف", d: "ملف فرصة كامل بالأرقام وخطة إطلاق خطوة بخطوة." },
-];
-
-const empty: NewCustomRequest = { field: "", idea: "", budget: "", city: "", timeline: "", name: "", phone: "", email: "", contactVia: "واتساب" };
+const empty: NewCustomRequest = { field: "", idea: "", budget: "", city: "", timeline: "", name: "", phone: "", contactVia: "" };
 
 export default function CustomProject() {
+  const { site } = useSite();
+  const cf = site.customForm;
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
   const [data, setData] = useState<NewCustomRequest>(empty);
@@ -50,7 +42,7 @@ export default function CustomProject() {
     }
     setState("sending");
     try {
-      await createCustomRequest({ ...data, email: data.email?.trim() || undefined });
+      await createCustomRequest({ ...data, contactVia: data.contactVia || cf.contactWays[0] || "" });
       setState("sent");
     } catch {
       setState("error");
@@ -74,7 +66,7 @@ export default function CustomProject() {
               <CheckCircle2 className="mx-auto size-16 text-success" />
               <h2 className="mt-5 text-3xl font-black">وصل طلبك يا {data.name.split(" ")[0]}!</h2>
               <p className="mx-auto mt-3 max-w-md text-ink-soft">
-                رح نتواصل معك عبر {data.contactVia} خلال 48 ساعة لنحدد موعد الجلسة الأولى.
+                رح نتواصل معك عبر {data.contactVia || cf.contactWays[0] || "الهاتف"} خلال 48 ساعة لنحدد موعد الجلسة الأولى.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <ButtonLink to="/ideas">تصفّح الأفكار الجاهزة</ButtonLink>
@@ -115,11 +107,11 @@ export default function CustomProject() {
                   >
                     {step === 0 && (
                       <div className="space-y-6">
-                        <Question title="بأي مجال حابب تشتغل؟">
-                          <Choices options={fields} value={data.field} onChange={(v) => set("field", v)} />
+                        <Question title={cf.fieldQuestion}>
+                          <Choices options={cf.fields} value={data.field} onChange={(v) => set("field", v)} />
                         </Question>
                         <TextArea
-                          label="عندك فكرة مبدئية؟ احكيلنا عنها"
+                          label={cf.ideaQuestion}
                           value={data.idea}
                           onChange={(e) => set("idea", e.target.value)}
                           placeholder="مثلاً: بدي محل صغير بيبيع… أو ما عندي فكرة بعد، بس عندي خبرة بـ…"
@@ -129,11 +121,11 @@ export default function CustomProject() {
 
                     {step === 1 && (
                       <div className="space-y-6">
-                        <Question title="قديش الميزانية المتوفرة؟">
-                          <Choices options={budgets} value={data.budget} onChange={(v) => set("budget", v)} cols={2} />
+                        <Question title={cf.budgetQuestion}>
+                          <Choices options={cf.budgets} value={data.budget} onChange={(v) => set("budget", v)} cols={2} />
                         </Question>
-                        <Question title="إمتى ناوي تبدأ؟">
-                          <Choices options={timelines} value={data.timeline} onChange={(v) => set("timeline", v)} cols={4} />
+                        <Question title={cf.timelineQuestion}>
+                          <Choices options={cf.timelines} value={data.timeline} onChange={(v) => set("timeline", v)} cols={4} />
                         </Question>
                         <Field label="المدينة" required value={data.city} onChange={(e) => set("city", e.target.value)} placeholder="مثلاً: رام الله" />
                       </div>
@@ -152,20 +144,13 @@ export default function CustomProject() {
                           onChange={(e) => set("phone", e.target.value)}
                           autoComplete="tel"
                         />
-                        <Field
-                          label="الإيميل"
-                          type="email"
-                          dir="ltr"
-                          className="sm:col-span-2 [&_input]:text-right"
-                          value={data.email}
-                          onChange={(e) => set("email", e.target.value)}
-                          hint="اختياري"
-                        />
-                        <div className="sm:col-span-2">
-                          <Question title="كيف بتحب نتواصل معك؟">
-                            <Choices options={contactWays} value={data.contactVia} onChange={(v) => set("contactVia", v)} cols={3} />
-                          </Question>
-                        </div>
+                        {cf.contactWays.length > 0 && (
+                          <div className="sm:col-span-2">
+                            <Question title={cf.contactQuestion}>
+                              <Choices options={cf.contactWays} value={data.contactVia || cf.contactWays[0]} onChange={(v) => set("contactVia", v)} cols={3} />
+                            </Question>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -181,7 +166,7 @@ export default function CustomProject() {
                             ["المدينة", data.city, 1],
                             ["الاسم", data.name, 2],
                             ["الهاتف", data.phone, 2],
-                            ["التواصل عبر", data.contactVia, 2],
+                            ["التواصل عبر", data.contactVia || cf.contactWays[0] || "—", 2],
                           ].map(([k, v, s]) => (
                             <div key={k as string} className="flex items-start justify-between gap-4 py-3 text-sm">
                               <dt className="shrink-0 text-muted">{k}</dt>
@@ -234,9 +219,9 @@ export default function CustomProject() {
         <aside className="lg:sticky lg:top-28 lg:self-start">
           <p className="mb-4 font-mono text-xs text-accent-deep">/ كيف منشتغل</p>
           <ol className="space-y-3">
-            {process.map((p) => (
-              <li key={p.n} className="flex gap-4 rounded-2xl bg-card p-4 ring-1 ring-ink/10">
-                <span className="font-mono text-sm text-accent-deep">{p.n}</span>
+            {cf.steps.map((p, i) => (
+              <li key={i} className="flex gap-4 rounded-2xl bg-card p-4 ring-1 ring-ink/10">
+                <span className="font-mono text-sm text-accent-deep">{String(i + 1).padStart(2, "0")}</span>
                 <div>
                   <p className="font-display font-bold">{p.t}</p>
                   <p className="mt-1 text-sm text-ink-soft">{p.d}</p>
@@ -244,7 +229,7 @@ export default function CustomProject() {
               </li>
             ))}
           </ol>
-          <p className="mt-4 text-xs leading-relaxed text-muted">بياناتك بتضل عندنا وما منشاركها مع حدا.</p>
+          {cf.note && <p className="mt-4 text-xs leading-relaxed text-muted">{cf.note}</p>}
         </aside>
       </Container>
     </>
