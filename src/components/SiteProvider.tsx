@@ -23,7 +23,9 @@ export function SiteProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoaded(true));
   }, []);
 
-  useEffect(reload, [reload]);
+  useEffect(() => {
+    reload();
+  }, [reload]);
 
   return <SiteContext.Provider value={{ site, loaded, reload }}>{children}</SiteContext.Provider>;
 }

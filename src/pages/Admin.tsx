@@ -61,12 +61,16 @@ export default function Admin() {
   const [newCounts, setNewCounts] = useState<Partial<Record<SubmissionKind, number>>>({});
 
   const refreshCounts = useCallback(() => {
-    Promise.all(submissionKinds.map((k) => getSubmissions(k))).then((lists) =>
-      setNewCounts(Object.fromEntries(submissionKinds.map((k, i) => [k, lists[i].filter((x) => x.status === "جديد").length]))),
-    );
+    Promise.all(submissionKinds.map((k) => getSubmissions(k)))
+      .then((lists) =>
+        setNewCounts(Object.fromEntries(submissionKinds.map((k, i) => [k, lists[i].filter((x) => x.status === "جديد").length]))),
+      )
+      .catch(() => {});
   }, []);
 
-  useEffect(refreshCounts, [refreshCounts, tab]);
+  useEffect(() => {
+    refreshCounts();
+  }, [refreshCounts, tab]);
 
   const go = (t: Tab) => setParams(t === "overview" ? {} : { tab: t });
   const current = tabs.find((t) => t.id === tab)!;

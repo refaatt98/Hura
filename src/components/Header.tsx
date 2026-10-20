@@ -13,7 +13,9 @@ export default function Header() {
   const { pathname } = useLocation();
   const { site } = useSite();
 
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
   }, [open]);
