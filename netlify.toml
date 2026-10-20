@@ -5,6 +5,20 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# Allow the site to be shown inside an <iframe> on any website (previews, embeds)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors *"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Content-Type-Options = "nosniff"
+
+# Long cache for hashed build assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # React Router: send every path to index.html
 [[redirects]]
   from = "/*"

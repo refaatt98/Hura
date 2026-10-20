@@ -35,6 +35,21 @@ src/
 - **صور إنستغرام:** بدّل الملفات بـ `public/instagram/` وعدّل `src/data/instagram.ts`.
 - **معلومات التواصل والوصف:** `src/data/site.ts`.
 
+## الصفحات
+| الرابط | الصفحة |
+|---|---|
+| `/` | الرئيسية |
+| `/ideas` · `/ideas/:id` | أفكار المشاريع وتفاصيل الفكرة (حاسبة + طلب شراء) |
+| `/custom` | طلب مشروع مخصص (نموذج على خطوات) |
+| `/workshops` · `/workshops/:id` | الورشات وتفاصيل الورشة (تسجيل) |
+| `/contact` | تواصل + أسئلة شائعة |
+| `/admin/login` · `/admin` | لوحة الإدارة |
+
+## لوحة الإدارة (وضع تجريبي)
+- الدخول التجريبي: `admin@hura.ps` / `hura2026`. لتغييره ضيف `VITE_ADMIN_EMAIL` و `VITE_ADMIN_PASSWORD` بـ Netlify.
+- ⚠️ هاد فحص بالمتصفح بس، **مش حماية حقيقية**. الحماية الحقيقية بتيجي مع Supabase Auth.
+- الطلبات والتعديلات محفوظة بـ localStorage، يعني بتظهر بس على نفس الجهاز اللي انعملت منه لحد ما نربط Supabase.
+
 ## Supabase (لاحقاً)
 كل الدوال بـ `src/lib/api.ts` بترجع `Promise`، فبس بنغيّر هالملف. المتغيرات المطلوبة موجودة بـ `.env.example`
 (`VITE_SUPABASE_URL` و `VITE_SUPABASE_ANON_KEY`). **لا تحط أبداً Personal Access Token (`sbp_...`) أو `service_role` key بالفرونت إند.**
@@ -42,3 +57,4 @@ src/
 ## النشر على Netlify
 الإعدادات جاهزة بـ `netlify.toml` (أمر البناء، مجلد `dist`، وتوجيه كل الروابط لـ `index.html` عشان React Router).
 اربط الـ repo من Netlify ← Add new site ← Import from Git، وما في داعي تغيّر إشي.
+الموقع مسموح يظهر جوا `<iframe>` بأي موقع (header: `frame-ancestors *`).

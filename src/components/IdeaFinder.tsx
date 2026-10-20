@@ -16,7 +16,7 @@ const questions: { q: string; options: Option[] }[] = [
     q: "كم الميزانية اللي بتقدر تبدأ فيها؟",
     options: [
       { label: "أقل من 10,000 ₪", hint: "بداية خفيفة", test: (i) => (i.capitalMin <= 10000 ? 3 : 0) },
-      { label: "10,000 – 35,000 ₪", hint: "مشروع صغير متكامل", test: (i) => (i.capitalMin <= 35000 && i.capitalMax >= 10000 ? 3 : 0) },
+      { label: "بين 10,000 و 35,000 ₪", hint: "مشروع صغير متكامل", test: (i) => (i.capitalMin <= 35000 && i.capitalMax >= 10000 ? 3 : 0) },
       { label: "أكثر من 35,000 ₪", hint: "مشروع أكبر", test: (i) => (i.capitalMax > 35000 ? 3 : 1) },
     ],
   },

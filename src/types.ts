@@ -75,3 +75,50 @@ export interface IdeaOrder {
 }
 
 export type NewIdeaOrder = Pick<IdeaOrder, "ideaId" | "ideaTitle" | "name" | "phone" | "email" | "notes">;
+
+export interface CustomRequest {
+  id: string;
+  field: string;
+  idea: string;
+  budget: string;
+  city: string;
+  timeline: string;
+  name: string;
+  phone: string;
+  email?: string;
+  contactVia: string;
+  createdAt: string;
+  status: RequestStatus;
+}
+
+export type NewCustomRequest = Omit<CustomRequest, "id" | "createdAt" | "status">;
+
+export interface WorkshopRegistration {
+  id: string;
+  workshopId: string;
+  workshopTitle: string;
+  name: string;
+  phone: string;
+  email?: string;
+  seats: number;
+  notes?: string;
+  createdAt: string;
+  status: RequestStatus;
+}
+
+export type NewWorkshopRegistration = Omit<WorkshopRegistration, "id" | "createdAt" | "status">;
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  contact: string;
+  subject: string;
+  message: string;
+  createdAt: string;
+  status: RequestStatus;
+}
+
+export type NewContactMessage = Omit<ContactMessage, "id" | "createdAt" | "status">;
+
+/** Kinds of submissions the admin can manage. */
+export type SubmissionKind = "orders" | "custom" | "registrations" | "messages";
