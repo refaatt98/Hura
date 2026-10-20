@@ -94,6 +94,13 @@
       linear-gradient(90deg, color-mix(in srgb, var(--color-paper) 6%, transparent) 1px, transparent 1px);
     background-size: 56px 56px;
   }
+  /* Same grid, for light (cream) sections */
+  .grid-lines-ink {
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--color-ink) 7%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--color-ink) 7%, transparent) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
   /* Outlined display text */
   .text-outline {
     color: transparent;

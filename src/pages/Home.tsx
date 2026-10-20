@@ -37,16 +37,17 @@ export default function Home() {
   return (
     <>
       {/* ───────── Hero ───────── */}
-      <section className="grid-lines relative overflow-hidden bg-ink text-paper">
-        <div className="pointer-events-none absolute -top-32 -left-32 size-[34rem] rounded-full bg-accent/30 blur-[140px]" />
-        <div className="pointer-events-none absolute right-0 bottom-0 size-80 rounded-full bg-flap-amber/10 blur-[120px]" />
+      <section className="relative overflow-hidden bg-paper text-ink">
+        <div className="grid-lines-ink pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_80%)]" />
+        <div className="pointer-events-none absolute -top-32 -left-32 size-[34rem] rounded-full bg-accent/20 blur-[140px]" />
+        <div className="pointer-events-none absolute right-0 bottom-0 size-80 rounded-full bg-flap-amber/20 blur-[120px]" />
 
         <Container className="relative grid items-center gap-14 pt-32 pb-28 sm:pt-36 lg:grid-cols-[1.2fr_1fr] lg:gap-12 lg:pb-32">
           <div>
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 inline-flex items-center gap-2 rounded-full bg-paper/10 px-3 py-1.5 text-xs font-medium ring-1 ring-paper/15"
+              className="mb-6 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-xs font-medium ring-1 ring-ink/10"
             >
               <span className="size-2 animate-pulse rounded-full bg-signal" />
               Hura Business · Hura Projects
@@ -75,7 +76,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45, duration: 0.6 }}
-              className="mt-7 max-w-xl text-lg leading-relaxed text-paper/70"
+              className="mt-7 max-w-xl text-lg leading-relaxed text-ink-soft"
             >
               {site?.about ?? " "}
             </motion.p>
@@ -89,7 +90,7 @@ export default function Home() {
               <ButtonLink to="/ideas" className="py-4">
                 تصفّح الفرص <ArrowUpLeft className="size-4" />
               </ButtonLink>
-              <ButtonLink to="/custom" variant="ghost-light" className="py-4">
+              <ButtonLink to="/custom" variant="ghost" className="py-4">
                 اطلب مشروع مخصص
               </ButtonLink>
             </motion.div>
@@ -100,8 +101,8 @@ export default function Home() {
             animate={{ opacity: 1, y: 0, rotate: 0 }}
             transition={{ delay: 0.4, duration: 0.9, ease }}
           >
-            {ideas.length ? <FlapBoard ideas={ideas} /> : <Skeleton className="h-72 !bg-ink-2" />}
-            <p className="mt-3 px-1 text-xs text-paper/40">* الأرقام تقديرية — التفاصيل الكاملة داخل كل ملف.</p>
+            {ideas.length ? <FlapBoard ideas={ideas} /> : <Skeleton className="h-72" />}
+            <p className="mt-3 px-1 text-xs text-muted">* الأرقام تقديرية — التفاصيل الكاملة داخل كل ملف.</p>
           </motion.div>
         </Container>
       </section>
